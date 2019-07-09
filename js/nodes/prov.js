@@ -4,7 +4,6 @@ define(function(require) {
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
 	var Mod = require('nodes/mod');
-	var Dependency = require('nodes/depend');
 	var Const = require('nodes/const');
 	var Link = require('link');
 	var Pair = require('token').Pair();
@@ -39,10 +38,9 @@ define(function(require) {
 
 				//if ((isNumber(data[0]) || typeof(data[0]) === "boolean")) {
 					var mod = new Mod(data.a).addToGroup(this.group);
-					var dep = new Dependency(mod.key).addToGroup(this.group);
-					mod.dep_key = dep.key;
+
 					var outLink = this.findLinksOutOf(null)[0];
-					outLink.changeFrom(dep.key, "n");
+					outLink.changeFrom(mod.key, "n");
 					var inLink = this.findLinksInto(null)[0];
 					inLink.changeTo(mod.key, "s");
 					this.delete();

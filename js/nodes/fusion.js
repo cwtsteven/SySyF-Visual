@@ -5,6 +5,7 @@ define(function(require) {
 	var RewriteFlag = require('token').RewriteFlag();
 	var Link = require('link');
 	var BoxWrapper = require('box-wrapper');
+	var Mod = require('nodes/mod');
 	var Promo = require('nodes/promo');
 	var Const = require('nodes/const');
 	var Projection = require('nodes/proj');
@@ -22,15 +23,21 @@ define(function(require) {
 		}
 		
 		transition(token, link) { 
-			if (link.to == this.key && link.toPort == "s") {
+			if (link.to == this.key) {
 				var nextLink = this.findLinksOutOf("n")[0];
-				token.rewriteFlag = RewriteFlag.F_FUSE;
+				token.dataStack.push(CompData.PROMPT);
 				return nextLink; 
+			}
+			else if (link.from == this.key) {
+				token.dataStack.pop();
+				token.rewriteFlag = RewriteFlag.F_FUSE;
+				var nextLink = this.findLinksInto("s")[0];
+				return nextLink;
 			}
 		}
 
 		rewrite(token, nextLink) {
-			if (token.rewriteFlag == RewriteFlag.F_FUSE && nextLink.from == this.key) {
+			if (token.rewriteFlag == RewriteFlag.F_FUSE && nextLink.to == this.key) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
 
 				nextLink = this.aux(this);
@@ -46,42 +53,61 @@ define(function(require) {
 		}
 
 		aux(node) {
-			var vec = new Param().addToGroup(this.group);
-			var con = new Contract().addToGroup(this.group);
-			new Link(con.key, vec.key, "n", "s").addToGroup(this.group);
-			var index = 0;
 			var nodes = [node];
+			var visitedCell = []; 
+			var target = []; 
 			while (nodes.length != 0) {
 				var node = nodes.pop();
-				if (node instanceof ProvCon) {
-					var c = new Const(node.data).addToGroup(this.group);
-					new Link(vec.key, c.key, "n", "s").addToGroup(this.group);
-					var proj = new Projection(index).addToGroup(this.group);
-					index++;
-					new Link(proj.key, con.key, "n", "s").addToGroup(this.group);
-					node.findLinksInto(null)[0].changeTo(proj.key,"s");
-					node.delete();
+
+				if (node instanceof ProvCon) { 
+					if (target.indexOf(node.key) == -1) 
+						target.push(node.key);
 				}
-				else if (node instanceof Projection) {
-					var proj = new Projection(index).addToGroup(this.group);
-					index++;
-					new Link(proj.key, con.key, "n", "s").addToGroup(this.group);
-					node.findLinksInto(null)[0].changeTo(proj.key,"s");
-					new Link(vec.key, node.key, "n", "s").addToGroup(this.group);
+				else if (node instanceof Projection) { 
+					if (target.indexOf(node.key) == -1) 
+						target.push(node.key); 
 				}
 				else if (node instanceof Promo) {
 					nodes = nodes.concat(promo.group.auxs);
 				}
+				else if (node instanceof Mod) {
+					if (visitedCell.indexOf(node.key) == -1) {
+						nodes.push(this.graph.findNodeByKey(node.findLinksOutOf(null)[0].to));
+						visitedCell.push(node.key);
+					}
+				}
 				else {
 					var newNodes = [];
 					var links = node.findLinksOutOf(null);
-					var i;
-					for (i=0; i<links.length; i++) {
-						newNodes[i] = this.graph.findNodeByKey(links[i].to);
-					}
+					links.forEach(function(link) {
+						newNodes.push(node.graph.findNodeByKey(link.to));
+					});
 					nodes = nodes.concat(newNodes);
 				}
 			}
+
+			console.log(target);
+
+			var index = 0;
+			var vec = new Param().addToGroup(this.group);
+			var con = new Contract().addToGroup(this.group);
+			new Link(con.key, vec.key, "n", "s").addToGroup(this.group);
+			target.forEach(function(key) {
+				var node = vec.graph.findNodeByKey(key);
+				var proj = new Projection(index).addToGroup(vec.group);
+				new Link(proj.key, con.key, "n", "s").addToGroup(vec.group);
+				node.findLinksInto(null)[0].changeTo(proj.key,"s");
+				index++;
+				if (node instanceof ProvCon) {
+					var c = new Const(node.data).addToGroup(vec.group);
+					new Link(vec.key, c.key, "n", "s").addToGroup(vec.group);					
+					node.delete();
+				}
+				else if (node instanceof Projection) {
+					new Link(vec.key, node.key, "n", "s").addToGroup(vec.group);
+				}
+			});
+
 			var nextLink = this.findLinksInto(null)[0];
 			nextLink.changeTo(con.key,"s");
 

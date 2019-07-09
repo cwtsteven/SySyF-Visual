@@ -7,15 +7,12 @@ define(function(require) {
 	var Pair = require('token').Pair();
 
 	class Mod extends Node {
-		
+
 		constructor(n) {
 			super(null, "", "indianred1");
 			this.data = n;
 			this.update(n);
-			this.dep_key = null;
 			this.graph.machine.cells.push(this.key);
-			this.width = "1";
-			this.height = "1";
 		}
 
 		transition(token, link) {
@@ -25,13 +22,18 @@ define(function(require) {
 				token.forward = false;
 				return link;
 			}
-		}
+			else if (link.from == this.key) {
+				token.machine.newValues.set(this.key, token.dataStack.last().a);
+				token.delete();
+				return null;
+			}
+		} 
 
 		update(data) {
 			if ((isNumber(data) || typeof(data) === "boolean")) {
 				var oldData = this.data;
 				this.data = data;
-				this.text = "M\n(" + this.key + "," + data + ")";
+				this.text = "M\n(" + data + ")";
 				return oldData;
 			}
 		}

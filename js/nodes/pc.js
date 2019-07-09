@@ -4,7 +4,6 @@ define(function(require) {
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
 	var Mod = require('nodes/mod');
-	var Dependency = require('nodes/depend');
 	var Const = require('nodes/const');
 	var Link = require('link');
 	var Pair = require('token').Pair();

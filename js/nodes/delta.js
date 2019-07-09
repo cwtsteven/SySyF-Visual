@@ -52,11 +52,10 @@ define(function(require) {
 				this.findLinksOutOf("w")[0].changeFrom(weak1.key, "n");
 
 				var mod = this.graph.findNodeByKey(key);
-				var dep = this.graph.findNodeByKey(mod.dep_key);
 
 				var weak2 = new Weak().addToGroup(this.group);
-				dep.findLinksOutOf(null)[0].changeFrom(weak2.key, 'n');
-				this.findLinksOutOf("e")[0].changeFrom(dep.key, "n");
+				mod.findLinksOutOf(null)[0].changeFrom(weak2.key, 'n');
+				this.findLinksOutOf("e")[0].changeFrom(mod.key, "n");
 
 				var wrapper = BoxWrapper.create().addToGroup(this.group);
 				var con = new Const(data.a).addToGroup(wrapper.box);

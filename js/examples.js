@@ -176,3 +176,12 @@ var rsum_ex =
 + 'let _ = step in\n' 
 + 'let _ = step in\n' 
 + 'o'; 
+
+var fusion_ex = 
+  'let x = {pc 1 + pc 2} in \n' 
++ 'let f = λ_.fusion x in \n' 
++ 'let ps = f 1 in \n' 
++ 'let _ = link x to pc 3 in \n' 
++ 'let qs = f 2 in \n' 
++ 'ps ⊞ qs';
+ 

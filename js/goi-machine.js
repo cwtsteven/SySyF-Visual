@@ -408,10 +408,9 @@ define('goi-machine', function(require) {
 			this.hasUpdate = false;
 			for (let key of this.cells) {
 				var cell = this.graph.findNodeByKey(key);
-				var dep = this.graph.findNodeByKey(cell.dep_key);
 				var evalToken = new MachineToken(this);
 				evalToken.isMain = false;
-				evalToken.setLink(dep.findLinksOutOf(null)[0]);
+				evalToken.setLink(cell.findLinksOutOf(null)[0]);
 				this.evalTokens.push(evalToken);
 			} 
 		}
