@@ -114,6 +114,12 @@ define(function(require) {
       while (this.isBinaryOp(nextToken) && nextToken.pred >= pred) {
         var op = nextToken;
         this.lexer._nextToken();
+        nextToken = this.lexer.lookahead();
+        if (nextToken.type == Token.LSQPAREN) {
+            this.lexer.skip(Token.LSQPAREN);
+            var id = this.lexer.token(Token.LCID);
+            this.lexer.match(Token.RSQPAREN);   
+        }
         var rhs = this.atom(ctx);
         //var rhs = this.term(ctx);
         nextToken = this.lexer.lookahead();
@@ -121,44 +127,7 @@ define(function(require) {
           rhs = this.parseBinop(ctx, rhs, nextToken.pred);
           nextToken = this.lexer.lookahead();
         }
-
         lhs = new Application(new Application(new Operation(op.type, op.value), lhs), rhs);
-
-        /*
-        if (op.type == Token.AND) {
-          lhs = new BinaryOp(BinOpType.And, "&&", lhs, rhs);
-        }
-        else if (op.type == Token.OR) {
-          lhs = new BinaryOp(BinOpType.Or, "||", lhs, rhs);
-        }
-        else if (op.type == Token.PLUS) {
-          lhs = new BinaryOp(BinOpType.Plus, "+", lhs, rhs);
-        }
-        else if (op.type == Token.SUB) {
-          lhs = new BinaryOp(BinOpType.Sub, "-", lhs, rhs);
-        }
-        else if (op.type == Token.MULT) {
-          lhs = new BinaryOp(BinOpType.Mult, "*", lhs, rhs);
-        }
-        else if (op.type == Token.DIV) {
-          lhs = new BinaryOp(BinOpType.Div, "/", lhs, rhs);
-        }
-        else if (op.type == Token.LTE) {
-          lhs = new BinaryOp(BinOpType.Lte, "<=", lhs, rhs);
-        }
-        else if (op.type == Token.COMMA) {
-          lhs = new Tuple(lhs, rhs);
-        }
-        else if (op.type == Token.VECPLUS) {
-          lhs = new BinaryOp(BinOpType.VecPlus, "⊞", lhs, rhs);
-        }
-        else if (op.type == Token.VECMULT) {
-          lhs = new BinaryOp(BinOpType.VecMult, "⊠", lhs, rhs);
-        }
-        else if (op.type == Token.VECDOT) {
-          lhs = new BinaryOp(BinOpType.VecDot, "⊡", lhs, rhs);
-        }
-        */
       }
       return lhs;
     }
