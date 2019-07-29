@@ -177,11 +177,56 @@ var rsum_ex =
 + 'let _ = step in\n' 
 + 'o'; 
 
+/*
+var linear_regression_ex = 
+let set = Λa.λx.λy.
+  let _ = link[a] x y in 
+  assign x y
+in
+
+let stabilise = λ_.rec f. 
+  if step then f 0 else false
+in
+
+let gradient_descent = Λa.λm.λps.λloss.
+  let rate = 0.001 in 
+  let d = 0.001 in 
+  let old_ps = peek[a] (deref[a] ps) in 
+  let g = λe.
+    let old_loss = loss m in 
+    let _ = set[a] ps 
+            (old_ps ⊞[a] (d ⊠[a] e)) 
+    in 
+    let new_loss = loss m in 
+    (((old_loss - new_loss) / d) * rate) ⊠[a] e 
+  in 
+  set[a] ps 
+         (fold[a] (λe.λps.(g e) ⊞[a] ps) old_ps)
+in
+
+let sq = λx.x * x
+in
+
+let loss = λy. 
+  let _ = set x 0 in 
+  let y1 = peek y in 
+  let _ = set x 2 in
+  let y2 = peek y in 
+  (sq (10 - y1) + sq (12 - y2)) / 2
+in
+
+let x = {0} in 
+let y = deref x * pc 1 + pc 0 in 
+fuse(a) ps from y in 
+let _ = gradient_descent[a] y ps loss in 
+let _ = set x 10 in 
+peek (deref x) 
+
 var fusion_ex = 
   'let x = {pc 1 + pc 2} in \n' 
-+ 'let f = λ_.fusion x in \n' 
++ 'F(a)ps. \n' 
 + 'let ps = f 1 in \n' 
 + 'let _ = link x pc 3 in \n' 
 + 'let qs = f 2 in \n' 
 + 'ps ⊞ qs';
- 
+*/

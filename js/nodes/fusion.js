@@ -10,6 +10,7 @@ define(function(require) {
 	var Contract = require('nodes/contract');
 	var Param = require('nodes/param');
 	var ProvCon = require('nodes/pc');
+	var Cell = require('nodes/cell');
 	var Pair = require('token').Pair();
 
 	class Fuse extends Node {
@@ -64,9 +65,9 @@ define(function(require) {
 						target.push(node.key); 
 				}
 				else if (node instanceof Promo) {
-					nodes = nodes.concat(promo.group.auxs);
+					nodes = nodes.concat(node.group.auxs);
 				}
-				else if (node instanceof Mod) {
+				else if (node instanceof Cell) {
 					if (visitedCell.indexOf(node.key) == -1) {
 						nodes.push(this.graph.findNodeByKey(node.findLinksOutOf(null)[0].to));
 						visitedCell.push(node.key);
