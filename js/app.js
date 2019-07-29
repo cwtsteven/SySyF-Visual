@@ -148,6 +148,21 @@ function specialChar(textarea) {
 		textarea.value = text.replace("\\Lambda", "Λ");
 		textarea.setSelectionRange(selection-6, selection-6);
 	}
+	else if (text.includes("\\sq+")) {
+		var selection = textarea.selectionStart;
+		textarea.value = text.replace("\\sq+", "⊞");
+		textarea.setSelectionRange(selection-3, selection-3);
+	}
+	else if (text.includes("\\sq*")) {
+		var selection = textarea.selectionStart;
+		textarea.value = text.replace("\\sq*", "⊠");
+		textarea.setSelectionRange(selection-3, selection-3);
+	}
+	else if (text.includes("\\sq.")) {
+		var selection = textarea.selectionStart;
+		textarea.value = text.replace("\\sq.", "⊡");
+		textarea.setSelectionRange(selection-3, selection-3);
+	}
 }
 
 var info = 

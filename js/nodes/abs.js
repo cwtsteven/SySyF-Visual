@@ -50,7 +50,7 @@ define(function(require) {
 					otherNextLink.reverse = false;
 
 					var otherNode = this.graph.findNodeByKey(otherNextLink.from);
-					if (otherNode instanceof Expo || otherNode instanceof PatTuple) 
+					if (otherNode.findLinksOutOf().length == 1) 
 						otherNextLink.fromPort = "n";
 					otherNextLink.changeToGroup(appOtherLink.group);
 					
