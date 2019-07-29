@@ -322,7 +322,7 @@ define('goi-machine', function(require) {
 					case Token.VECPLUS:
 					case Token.VECMULT:
 					case Token.VECDOT: 
-						return this.createBinOp(ast.name, ast.type, group);
+						return this.createBinOp(ast.name, ast.type, group); 
 					case Token.LINK:
 					case Token.ASSIGN:
 					case Token.FOLD: 
@@ -475,7 +475,7 @@ define('goi-machine', function(require) {
 			wrapper2.auxs = wrapper2.createPaxsOnTopOf([vl]);
 
 			new Link(abs1.key, wrapper2.prin.key, "e", "s").addToGroup(abs1.group);
-			new Link(wrapper2.aux[0].key, abs1.key, "nw", "w", true).addToGroup(abs1.group);
+			new Link(wrapper2.auxs[0].key, abs1.key, "nw", "w", true).addToGroup(abs1.group);
 
 			wrapper1.auxs = [];
 
