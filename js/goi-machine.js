@@ -470,7 +470,7 @@ define('goi-machine', function(require) {
 			new Link(node.key, vr.key, "e", "s").addToGroup(wrapper2.box);
 
 			new Link(abs2.key, node.key, "e", "s").addToGroup(abs2.group);
-			new Link(vr.key, abs2.key, "nw", "w").addToGroup(abs2.group);
+			new Link(vr.key, abs2.key, "nw", "w", true).addToGroup(abs2.group);
 
 			wrapper2.aux = wrapper2.createPaxsOnTopOf([vl]);
 
