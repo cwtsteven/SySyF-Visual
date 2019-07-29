@@ -322,7 +322,7 @@ define('goi-machine', function(require) {
 					case Token.VECPLUS:
 					case Token.VECMULT:
 					case Token.VECDOT: 
-						node = new BinOp(ast.name, ast.type).addToGroup(group); return this.createBinOp(node, group);
+						return this.createBinOp(ast.name, ast.type, group);
 					case Token.LINK:
 					case Token.ASSIGN:
 					case Token.FOLD: 
@@ -454,7 +454,7 @@ define('goi-machine', function(require) {
 			*/
 		}
 
-		createBinOp(node, group) {
+		createBinOp(name, type, group) {
 			var wrapper1 = BoxWrapper.create().addToGroup(group);
 			var abs1 = new Abs().addToGroup(wrapper1.box);
 			new Link(wrapper1.prin.key, abs1.key, "n", "s").addToGroup(wrapper1);
@@ -463,7 +463,7 @@ define('goi-machine', function(require) {
 			var abs2 = new Abs().addToGroup(wrapper2.box);
 			new Link(wrapper2.prin.key, abs2.key, "n", "s").addToGroup(wrapper2);
 
-			node.addToGroup(wrapper2.box); 
+			var node = new BinOp(name, type).addToGroup(wrapper2.box); 
 			var vl = new Var('x').addToGroup(wrapper2.box);
 			var vr = new Var('y').addToGroup(wrapper2.box);
 			new Link(node.key, vl.key, "w", "s").addToGroup(wrapper2.box);
@@ -472,12 +472,12 @@ define('goi-machine', function(require) {
 			new Link(abs2.key, node.key, "e", "s").addToGroup(abs2.group);
 			new Link(vr.key, abs2.key, "nw", "w", true).addToGroup(abs2.group);
 
-			wrapper2.aux = wrapper2.createPaxsOnTopOf([vl]);
+			wrapper2.auxs = wrapper2.createPaxsOnTopOf([vl]);
 
 			new Link(abs1.key, wrapper2.prin.key, "e", "s").addToGroup(abs1.group);
 			new Link(wrapper2.aux[0].key, abs1.key, "nw", "w", true).addToGroup(abs1.group);
 
-			wrapper1.aux = [];
+			wrapper1.auxs = [];
 
 			return new Term(wrapper1.prin, wrapper1.auxs); 
 		}
