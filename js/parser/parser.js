@@ -89,7 +89,7 @@ define(function(require) {
         const term = this.term(ctx);
         return new Fusion(id, term); 
       }
-      else if (this.lexer.skip(Token.BIGLAMDA)) {
+      else if (this.lexer.skip(Token.BIGLAMBDA)) {
         var id = this.lexer.token(Token.LCID);
         this.lexer.match(Token.DOT);
         const term = this.term(ctx);

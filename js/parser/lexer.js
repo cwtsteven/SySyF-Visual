@@ -2,26 +2,6 @@ define(function(require) {
 
   var Token = require('parser/token');
 
-  var Op = {
-    AND: 0,
-    OR: 1,
-    PLUS: 2,
-    SUB: 3,
-    MULT: 4,
-    DIV: 5,
-    LTE: 6,
-    COMMA: 7,
-    VECPLUS: 8,
-    VECMULT: 9,
-    VECDOT: 10,
-    PEEK: 11,
-    DERER: 12,
-    LINK: 13,
-    ASSIGN: 14,
-    STEP: 15,
-    FOLD: 16,
-  }
-
   class Lexer {
     constructor(input) {
       this._input = input;

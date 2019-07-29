@@ -65,8 +65,8 @@ define(function() {
     'FOLD', 
 
     'BIGLAMBDA',
-    'LSQPARAM',
-    'RSQPARAM',
+    'LSQPAREM',
+    'RSQPAREM',
     //'SEQ',
   ].forEach(token => Token[token] = token);
 
