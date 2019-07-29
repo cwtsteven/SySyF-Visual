@@ -4,6 +4,7 @@ define(function(require) {
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
 	var Link = require('link');
+	var Contract = require('nodes/contract');
 	var Pair = require('token').Pair();
 
 	class If extends Node {

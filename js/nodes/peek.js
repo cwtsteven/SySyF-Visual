@@ -6,6 +6,7 @@ define(function(require) {
 	var BoxWrapper = require('box-wrapper');
 	var Const = require('nodes/const');
 	var Link = require('link');
+	var Contract = require('nodes/contract');
 	var Pair = require('token').Pair();
 
 	class Peek extends Node {

@@ -143,6 +143,11 @@ function specialChar(textarea) {
 		textarea.value = text.replace("\\lambda", "λ");
 		textarea.setSelectionRange(selection-6, selection-6);
 	}
+	else if (text.includes("\\Lambda")) {
+		var selection = textarea.selectionStart;
+		textarea.value = text.replace("\\Lambda", "Λ");
+		textarea.setSelectionRange(selection-6, selection-6);
+	}
 }
 
 var info = 

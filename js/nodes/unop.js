@@ -7,6 +7,7 @@ define(function(require) {
 	var BoxWrapper = require('box-wrapper');
 	var Const = require('nodes/const');
 	var Token = require('parser/token');
+	var Contract = require('nodes/contract');
 	var Pair = require('token').Pair();
 
 	class UnOp extends Node {

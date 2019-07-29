@@ -8,6 +8,7 @@ define(function(require) {
 	var Promo = require('nodes/promo');
 	var Const = require('nodes/const');
 	var Token = require('parser/token');
+	var Contract = require('nodes/contract');
 	var Pair = require('token').Pair();
 
 	class BinOp extends Node {

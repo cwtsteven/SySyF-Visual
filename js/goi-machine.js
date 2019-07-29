@@ -337,7 +337,7 @@ define('goi-machine', function(require) {
 						var node = new Deref(); return this.createUnOp(node, group);
 					case Token.STEP:
 						var node = new Step().addToGroup(group);
-						return Term(node, []);
+						return new Term(node, []);
 				}
 			}
 

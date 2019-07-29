@@ -3,7 +3,6 @@ define(function(require) {
 	var Node = require('node');
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
-	var Contract = require('nodes/contract');
 	var Pair = require('token').Pair();
 
 	class Cell extends Node {
