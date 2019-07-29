@@ -54,15 +54,19 @@ define(function() {
     'THEN',
     'ELSE',
 
-    'SET',
-    'CHANGE',
-    'TO',
-    'PROP',
-    'DEP',
+    'ASSIGN',
+    'LINK',
+    //'TO',
+    'STEP',
+    'PEEK',
     'DEREF', 
     'FUSE',
     'PC',
-    'FOLD',
+    'FOLD', 
+
+    'BIGLAMBDA',
+    'LSQPARAM',
+    'RSQPARAM',
     //'SEQ',
   ].forEach(token => Token[token] = token);
 

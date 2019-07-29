@@ -62,34 +62,9 @@ define('ast/operation', function() {
   class Operation {
     constructor(type, name) {
       this.type = type;
-      this.name = name;
     }
   }
   return Operation;
-});
-
-define('ast/unary-op', function(require) {
-  var Operation = require('ast/operation');
-  
-  class UnaryOp extends Operation {
-    constructor(type, name, v1) {
-      super(type, name);
-      this.v1 = v1;
-    }
-  }
-  return UnaryOp;
-});
-
-define('ast/binary-op', function(require) {
-  var UnaryOp = require('ast/unary-op');
-
-  class BinaryOp extends UnaryOp {
-    constructor(type, name, v1, v2) {
-      super(type, name, v1);
-      this.v2 = v2;
-    }
-  }
-  return BinaryOp;
 });
 
 define('ast/if-then-else', function() {
@@ -123,64 +98,19 @@ define('ast/tuple', function() {
   return Tuple;
 });
 
-define('ast/provisional-constant', function() {
-  class ProvisionalConstant {
+define('ast/cell-creation', function() {
+  class CellCreation {
     constructor(term) {
       this.term = term;
     }
   }
-  return ProvisionalConstant;
-});
-
-define('ast/change', function() {
-  class Change {
-    constructor(param, body) {
-      this.param = param;
-      this.body = body;
-    }
-  }
-  return Change;
-});
-
-define('ast/assign', function() {
-  class Assign {
-    constructor(param, body) {
-      this.param = param;
-      this.body = body;
-    }
-  }
-  return Assign;
-});
-
-define('ast/propagation', function() {
-  class Propagation {
-    constructor() {
-    }
-  }
-  return Propagation;
-});
-
-define('ast/deprecation', function() {
-  class Deprecation {
-    constructor(term) {
-      this.term = term;
-    }
-  }
-  return Deprecation;
-});
-
-define('ast/deref', function() {
-  class Dereference {
-    constructor(term) {
-      this.term = term;
-    }
-  }
-  return Dereference;
+  return CellCreation;
 });
 
 define('ast/fusion', function() {
   class Fusion {
-    constructor(term) {
+    constructor(id, term) {
+      this.id = id;
       this.term = term;
     }
   }
@@ -193,15 +123,5 @@ define('ast/pc', function() {
       this.data = data;
     }
   }
-  return Pc;
-});
-
-define('ast/fold', function() {
-  class Folding {
-    constructor(v1,v2) {
-      this.v1 = v1;
-      this.v2 = v2;
-    }
-  }
-  return Folding;
+  return Pc; 
 });

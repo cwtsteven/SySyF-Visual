@@ -3,8 +3,6 @@ define(function(require) {
 	var Node = require('node');
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
-	var Promo = require('nodes/promo');
-	var Weak = require('nodes/weak');
 	var Link = require('link');
 	var Pair = require('token').Pair();
 
@@ -83,9 +81,9 @@ define(function(require) {
 					var downLink = this.findLinksInto(null)[0];
 					var otherLink = this.findLinksOutOf(nextLink.fromPort == "n"?"e":"n")[0];
 					nextLink.changeFrom(downLink.from, downLink.fromPort);
-					var weak = new Weak(this.graph.findNodeByKey(otherLink.to).name).addToGroup(this.group);
+					var weak = new Contract(this.graph.findNodeByKey(otherLink.to).name).addToGroup(this.group);
 					otherLink.changeFrom(weak.key, "n");
-					var weak = new Weak().addToGroup(this.group);
+					var weak = new Contract().addToGroup(this.group);
 					new Link(weak.key, left.key, "n", "s").addToGroup(this.group);
 					this.delete();
 					//left.group.delete();

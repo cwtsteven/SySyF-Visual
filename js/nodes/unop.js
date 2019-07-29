@@ -5,10 +5,8 @@ define(function(require) {
 	var RewriteFlag = require('token').RewriteFlag();
 	var Link = require('link');
 	var BoxWrapper = require('box-wrapper');
-	var Promo = require('nodes/promo');
 	var Const = require('nodes/const');
 	var UnOpType = require('op').UnOpType;
-	var Weak = require('nodes/weak');
 	var Pair = require('token').Pair();
 
 	class UnOp extends Node {
@@ -48,7 +46,7 @@ define(function(require) {
 					new Link(wrapper.prin.key, newConst.key, "n", "s").addToGroup(wrapper);
 					nextLink.changeTo(wrapper.prin.key, "s");
 					//prev.group.delete(); 
-					var weak = new Weak().addToGroup(this.group);
+					var weak = new Contract().addToGroup(this.group);
 					new Link(weak.key, prev.key, "n", "s").addToGroup(this.group);
 					this.delete(); 
 				}

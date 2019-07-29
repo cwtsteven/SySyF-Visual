@@ -3,12 +3,12 @@ define(function(require) {
 	var Node = require('node');
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
-	var Mod = require('nodes/mod');
+	var Cell = require('nodes/cell');
 	var Const = require('nodes/const');
 	var Link = require('link');
 	var Pair = require('token').Pair();
 
-	class Prov extends Node {
+	class CellCreate extends Node {
 		
 		constructor() {
 			super('circle', 'm', "indianred1");
@@ -37,7 +37,7 @@ define(function(require) {
 				var data = token.dataStack.pop();
 
 				//if ((isNumber(data[0]) || typeof(data[0]) === "boolean")) {
-					var mod = new Mod(data.a).addToGroup(this.group);
+					var mod = new Cell(data.a).addToGroup(this.group);
 
 					var outLink = this.findLinksOutOf(null)[0];
 					outLink.changeFrom(mod.key, "n");
@@ -67,9 +67,9 @@ define(function(require) {
 		}
 
 		copy() {
-			return new Prov();
+			return new CellCreate();
 		}
 	}
 
-	return Prov;
+	return CellCreate;
 });

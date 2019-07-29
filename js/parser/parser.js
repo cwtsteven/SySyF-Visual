@@ -7,23 +7,13 @@ define(function(require) {
   var Application = require('ast/application');
   var Identifier = require('ast/identifier');
   var Constant = require('ast/constant');
-  var UnaryOp = require('ast/unary-op');
-  var BinaryOp = require('ast/binary-op');
+  var Operation = require('ast/operation');
   var IfThenElse = require('ast/if-then-else');
   var Recursion = require('ast/recursion');
   var Tuple = require('ast/tuple');
-  var ProvisionalConstant = require('ast/provisional-constant');
-  var Change = require('ast/change');
-  var Assign = require('ast/assign');
-  var Propagation = require('ast/propagation');
-  var Deprecation = require('ast/deprecation');
-  var Dereference = require('ast/deref');
+  var CellCreation = require('ast/cell-creation');
   var Fusion = require('ast/fusion');
-  var Pc = require('ast/pc');
-  var Folding = require('ast/fold');
-
-  var BinOpType = require('op').BinOpType;
-  var UnOpType = require('op').UnOpType;
+  var Pc = require('ast/pc'); 
 
   class Parser {
     constructor(lexer) {
@@ -39,9 +29,11 @@ define(function(require) {
     }
 
     // term ::= LAMBDA LCID DOT term
-    //        | LET LCID DEFINE term IN term 
+    //        | LET PATTERN DEFINE term IN term 
     //        | REC LCID DOT term
     //        | IF term THEN term ELSE term
+    //        | FUSE LPAREM LCID RPAREM LCID DOT term
+    //        | BIGLAMBDA LCID DOT term
     //        | application
     term(ctx) {
       if (this.lexer.skip(Token.LAMBDA)) {
@@ -88,6 +80,21 @@ define(function(require) {
         const t2 = this.term(ctx);
         return new IfThenElse(cond, t1, t2);
       }
+      else if (this.lexer.skip(Token.FUSE)) {
+        this.lexer.match(Token.LPAREN);
+        var name = this.lexer.token(Token.LCID);
+        this.lexer.match(Token.RPAREN);
+        var id = this.lexer.token(Token.LCID);
+        this.lexer.match(Token.DOT);
+        const term = this.term(ctx);
+        return new Fusion(id, term); 
+      }
+      else if (this.lexer.skip(Token.BIGLAMDA)) {
+        var id = this.lexer.token(Token.LCID);
+        this.lexer.match(Token.DOT);
+        const term = this.term(ctx);
+        return term; 
+      }
       else {
         return this.application(ctx);
       }
@@ -114,6 +121,10 @@ define(function(require) {
           rhs = this.parseBinop(ctx, rhs, nextToken.pred);
           nextToken = this.lexer.lookahead();
         }
+
+        lhs = new Application(new Application(new Operation(op.type), lhs), rhs);
+
+        /*
         if (op.type == Token.AND) {
           lhs = new BinaryOp(BinOpType.And, "&&", lhs, rhs);
         }
@@ -147,6 +158,7 @@ define(function(require) {
         else if (op.type == Token.VECDOT) {
           lhs = new BinaryOp(BinOpType.VecDot, "⊡", lhs, rhs);
         }
+        */
       }
       return lhs;
     }
@@ -159,6 +171,18 @@ define(function(require) {
         if (this.isBinaryOp(this.lexer.lookahead())) {
           lhs = this.parseBinop(ctx, lhs, 0);
         }
+        else if (this.lexer.lookahead().type == Token.LSQPAREN) {
+            this.lexer.skip(Token.LSQPAREN);
+            var id = this.lexer.token(Token.LCID);
+            this.lexer.match(Token.RSQPAREN);
+            rhs = this.atom(ctx);
+            if (!rhs) {
+              return lhs;
+            } else {
+              lhs = new Application(lhs, rhs);
+            }
+        }
+        
         else {
           rhs = this.atom(ctx);
           
@@ -176,9 +200,9 @@ define(function(require) {
     //        | INT
     //        | TRUE
     //        | FALSE
-    //        | NOT term
-    //        | PROP 
-    //        | CHANGE LCID TO term
+    //        | CLPAREM term CRPAREM
+    //        | PC INT
+    //        | op 
     atom(ctx) {
       if (this.lexer.skip(Token.LPAREN)) {
         const term = this.term(ctx);
@@ -199,50 +223,25 @@ define(function(require) {
       else if (this.lexer.skip(Token.FALSE)) {
         return new Constant(false);
       } 
-      else if (this.lexer.skip(Token.NOT)) {
-        const term = this.term(ctx);
-        return new UnaryOp(UnOpType.Not, "~", term);
-      }
-      else if (this.lexer.skip(Token.PROP)) {
-        return new Propagation();
-      }
-      else if (this.lexer.skip(Token.DEP)) {
-        var term = this.term(ctx);
-        return new Deprecation(term);
-      }
-      else if (this.lexer.skip(Token.DEREF)) {
-        var term = this.term(ctx);
-        return new Dereference(term);
-      }
       else if (this.lexer.skip(Token.CLPAREN)) {
         var term = this.term(ctx);
         this.lexer.match(Token.CRPAREN);
-        return new ProvisionalConstant(term);
-      }
-      else if (this.lexer.skip(Token.CHANGE)) {
-        const id = this.lexer.token(Token.LCID);
-        this.lexer.match(Token.TO);
-        const term = this.term(ctx);
-        return new Change(id, term);
-      }
-      else if (this.lexer.skip(Token.SET)) {
-        const id = this.lexer.token(Token.LCID);
-        this.lexer.match(Token.TO);
-        const term = this.term(ctx);
-        return new Assign(id, term); 
-      }
-      else if (this.lexer.skip(Token.FUSE)) {
-        const term = this.term(ctx);
-        return new Fusion(term); 
+        return new CellCreation(term);
       }
       else if (this.lexer.skip(Token.PC)) {
         const n = this.lexer.token(Token.INT);
         return new Pc(n); 
       }
-      else if (this.lexer.skip(Token.FOLD)) {
-        const v1 = this.atom(ctx);
-        const v2 = this.atom(ctx)
-        return new Folding(v1,v2); 
+      else if (this.lexer.next(Token.PEEK) || this.lexer.next(Token.DEREF) || this.lexer.next(Token.LINK)
+               || this.lexer.next(Token.ASSIGN) || this.lexer.next(Token.STEP) || this.lexer.next(Token.FOLD)
+               || this.lexer.next(Token.AND) || this.lexer.next(Token.OR) || this.lexer.next(Token.PLUS)
+               || this.lexer.next(Token.SUB) || this.lexer.next(Token.MULT) || this.lexer.next(Token.DIV)
+               || this.lexer.next(Token.LTE) || this.lexer.next(Token.COMMA) || this.lexer.next(Token.VECPLUS)
+               || this.lexer.next(Token.VECMULT) || this.lexer.next(Token.VECDOT)
+              ) {
+        var op = this.lexer.lookahead();
+        this.lexer._nextToken();
+        return new Operation(op.type); 
       }
       else {
         return undefined;

@@ -6,15 +6,13 @@ define(function(require) {
 	var BoxWrapper = require('box-wrapper');
 	var Const = require('nodes/const');
 	var Link = require('link');
-	var Weak = require('nodes/weak');
-	var ProvCon = require('nodes/pc');
 	var Const = require('nodes/const');
 	var Param = require('nodes/param');
 	var Projection = require('nodes/proj');
 	var Contract = require('nodes/contract');
 	var Pair = require('token').Pair();
 
-	class Set extends Node {
+	class Assign extends Node {
 
 		constructor() {
 			super(null, "a", "indianred1");
@@ -66,9 +64,9 @@ define(function(require) {
 					var mod = this.graph.findNodeByKey(key);
 					mod.update(data);
 				}
-				var weak1 = new Weak().addToGroup(this.group);
+				var weak1 = new Contract().addToGroup(this.group);
 				this.findLinksOutOf("w")[0].changeFrom(weak1.key, "n");
-				var weak2 = new Weak().addToGroup(this.group);
+				var weak2 = new Contract().addToGroup(this.group);
 				this.findLinksOutOf("e")[0].changeFrom(weak2.key, "n");
 
 				var wrapper = BoxWrapper.create().addToGroup(this.group);
@@ -110,9 +108,9 @@ define(function(require) {
 		}
 
 		copy() {
-			return new Set();
+			return new Assign();
 		}
 	}
 
-	return Set;
+	return Assign;
 });

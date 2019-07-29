@@ -6,10 +6,9 @@ define(function(require) {
 	var BoxWrapper = require('box-wrapper');
 	var Const = require('nodes/const');
 	var Link = require('link');
-	var Weak = require('nodes/weak');
 	var Pair = require('token').Pair();
 
-	class Dep extends Node {
+	class Peek extends Node {
 		
 		constructor() {
 			super(null, 'p', "mediumpurple1");
@@ -39,7 +38,7 @@ define(function(require) {
 
 				//if ((isNumber(data.a) || typeof(data.a) === "boolean") || typeof(data.a) === "array") {
 					var outLink = this.findLinksOutOf(null)[0]; 
-					var weak = new Weak(outLink.text).addToGroup(this.group);
+					var weak = new Contract(outLink.text).addToGroup(this.group);
 					outLink.changeFrom(weak.key, "n");
 
 					var wrapper = BoxWrapper.create().addToGroup(this.group);
@@ -63,9 +62,9 @@ define(function(require) {
 		}
 
 		copy() {
-			return new Dep();
+			return new Peek();
 		}
 	}
 
-	return Dep;
+	return Peek;
 });

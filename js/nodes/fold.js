@@ -5,10 +5,7 @@ define(function(require) {
 	var RewriteFlag = require('token').RewriteFlag();
 	var Link = require('link');
 	var BoxWrapper = require('box-wrapper');
-	var Promo = require('nodes/promo');
 	var Const = require('nodes/const');
-	var BinOpType = require('op').BinOpType;
-	var Weak = require('nodes/weak');
 	var App = require('nodes/app');
 	var Der = require('nodes/der');
 	var Contract = require('nodes/contract');
@@ -56,7 +53,7 @@ define(function(require) {
 				var right = this.graph.findNodeByKey(this.findLinksOutOf("e")[0].to);
 
 				if (len == 0) {
-					var weak = new Weak().addToGroup(this.group);
+					var weak = new Contract().addToGroup(this.group);
 					new Link(weak.key, left.key, "n", "s").addToGroup(this.group);
 					this.findLinksInto(null)[0].changeTo(right.key);
 					this.delete();

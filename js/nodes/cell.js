@@ -6,7 +6,7 @@ define(function(require) {
 	var Contract = require('nodes/contract');
 	var Pair = require('token').Pair();
 
-	class Mod extends Node {
+	class Cell extends Node {
 
 		constructor(n) {
 			super(null, "", "indianred1");
@@ -43,5 +43,5 @@ define(function(require) {
 		}
 	}
 
-	return Mod;
+	return Cell;
 });

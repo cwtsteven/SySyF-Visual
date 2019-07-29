@@ -3,13 +3,6 @@ define(function(require) {
 	var Node = require('node');
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
-	var Link = require('link');
-	var BoxWrapper = require('box-wrapper');
-	var Promo = require('nodes/promo');
-	var Const = require('nodes/const');
-	var UnOpType = require('op').UnOpType;
-	var Weak = require('nodes/weak');
-	var Pair = require('token').Pair();
 
 	class Projection extends Node {
 

@@ -2,10 +2,6 @@ define(function(require) {
 
 	var Node = require('node');
 	var CompData = require('token').CompData();
-	var RewriteFlag = require('token').RewriteFlag();
-	var Mod = require('nodes/mod');
-	var Const = require('nodes/const');
-	var Link = require('link');
 	var Pair = require('token').Pair();
 
 	class ProvCon extends Node {

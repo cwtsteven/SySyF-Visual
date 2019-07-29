@@ -2,6 +2,26 @@ define(function(require) {
 
   var Token = require('parser/token');
 
+  var Op = {
+    AND: 0,
+    OR: 1,
+    PLUS: 2,
+    SUB: 3,
+    MULT: 4,
+    DIV: 5,
+    LTE: 6,
+    COMMA: 7,
+    VECPLUS: 8,
+    VECMULT: 9,
+    VECDOT: 10,
+    PEEK: 11,
+    DERER: 12,
+    LINK: 13,
+    ASSIGN: 14,
+    STEP: 15,
+    FOLD: 16,
+  }
+
   class Lexer {
     constructor(input) {
       this._input = input;
@@ -135,6 +155,22 @@ define(function(require) {
           this._token = new Token(Token.VECDOT, null, 13);
           break;
 
+        case 'F':
+          this._token = new Token(Token.FUSE);
+          break;
+
+        case 'Λ':
+          this._token = new Token(Token.BIGLAMBDA);
+          break;
+
+        case '[':
+          this._token = new Token(Token.LSQPARAM);
+          break;
+
+        case ']':
+          this._token = new Token(Token.RSQPARAM);
+          break;
+
         default:
           // text for string
           if (/[a-z]|_|'/.test(c)) {
@@ -165,15 +201,15 @@ define(function(require) {
             else if (str == "else")
               this._token = new Token(Token.ELSE);
             else if (str == "link")
-              this._token = new Token(Token.CHANGE);
+              this._token = new Token(Token.LINK);
             else if (str == "assign")
-              this._token = new Token(Token.SET);
-            else if (str == "to")
-              this._token = new Token(Token.TO);
+              this._token = new Token(Token.ASSIGN);
+            //else if (str == "to")
+            //  this._token = new Token(Token.TO);
             else if (str == "step")
-              this._token = new Token(Token.PROP);
+              this._token = new Token(Token.STEP);
             else if (str == "peek")
-              this._token = new Token(Token.DEP);
+              this._token = new Token(Token.PEEK);
             else if (str == "deref")
               this._token = new Token(Token.DEREF);
             else if (str == "fusion")

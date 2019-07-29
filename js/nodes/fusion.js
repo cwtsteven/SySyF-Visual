@@ -4,16 +4,12 @@ define(function(require) {
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
 	var Link = require('link');
-	var BoxWrapper = require('box-wrapper');
-	var Mod = require('nodes/mod');
 	var Promo = require('nodes/promo');
 	var Const = require('nodes/const');
 	var Projection = require('nodes/proj');
-	var Const = require('nodes/const');
 	var Contract = require('nodes/contract');
 	var Param = require('nodes/param');
 	var ProvCon = require('nodes/pc');
-	var Weak = require('nodes/weak');
 	var Pair = require('token').Pair();
 
 	class Fuse extends Node {
@@ -111,7 +107,7 @@ define(function(require) {
 			var nextLink = this.findLinksInto(null)[0];
 			nextLink.changeTo(con.key,"s");
 
-			var weak = new Weak().addToGroup(this.group);
+			var weak = new Contract().addToGroup(this.group);
 			this.findLinksOutOf(null)[0].changeFrom(weak.key,"n");
 			this.delete()
 			return nextLink;

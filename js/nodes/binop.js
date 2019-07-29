@@ -8,7 +8,6 @@ define(function(require) {
 	var Promo = require('nodes/promo');
 	var Const = require('nodes/const');
 	var BinOpType = require('op').BinOpType;
-	var Weak = require('nodes/weak');
 	var Pair = require('token').Pair();
 
 	class BinOp extends Node {
@@ -59,9 +58,9 @@ define(function(require) {
 					
 					//left.group.delete();
 					//right.group.delete();
-					var weak = new Weak().addToGroup(this.group);
+					var weak = new Contract().addToGroup(this.group);
 					new Link(weak.key, left.key, "n", "s").addToGroup(this.group);
-					var weak = new Weak().addToGroup(this.group);
+					var weak = new Contract().addToGroup(this.group);
 					new Link(weak.key, right.key, "n", "s").addToGroup(this.group);
 					this.delete(); 
 				}

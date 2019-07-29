@@ -6,10 +6,9 @@ define(function(require) {
 	var BoxWrapper = require('box-wrapper');
 	var Const = require('nodes/const');
 	var Link = require('link');
-	var Weak = require('nodes/weak');
 	var Pair = require('token').Pair();
 
-	class Delta extends Node {
+	class Linking extends Node {
 
 		constructor() {
 			super(null, "l", "indianred1");
@@ -48,12 +47,12 @@ define(function(require) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
 
 				var data = token.dataStack.last();
-				var weak1 = new Weak().addToGroup(this.group);
+				var weak1 = new Contract().addToGroup(this.group);
 				this.findLinksOutOf("w")[0].changeFrom(weak1.key, "n");
 
 				var mod = this.graph.findNodeByKey(key);
 
-				var weak2 = new Weak().addToGroup(this.group);
+				var weak2 = new Contract().addToGroup(this.group);
 				mod.findLinksOutOf(null)[0].changeFrom(weak2.key, 'n');
 				this.findLinksOutOf("e")[0].changeFrom(mod.key, "n");
 
@@ -74,9 +73,9 @@ define(function(require) {
 		}
 
 		copy() {
-			return new Delta();
+			return new Linking();
 		}
 	}
 
-	return Delta;
+	return Linking;
 });

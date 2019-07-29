@@ -4,11 +4,6 @@ define(function(require) {
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
 	var Link = require('link');
-	var BoxWrapper = require('box-wrapper');
-	var Promo = require('nodes/promo');
-	var Const = require('nodes/const');
-	var BinOpType = require('op').BinOpType;
-	var Weak = require('nodes/weak');
 	var Pair = require('token').Pair();
 
 	class Param extends Node {

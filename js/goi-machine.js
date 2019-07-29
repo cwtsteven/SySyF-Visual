@@ -23,21 +23,14 @@ define('goi-machine', function(require) {
 	var Identifier = require('ast/identifier');
 	var Constant = require('ast/constant');
 	var Operation = require('ast/operation');
-	var UnaryOp = require('ast/unary-op');
-	var BinaryOp = require('ast/binary-op');
 	var IfThenElse = require('ast/if-then-else');
 	var Recursion = require('ast/recursion');
 	var Tuple = require('ast/tuple');
-	var ProvisionalConstant = require('ast/provisional-constant');
-	var Change = require('ast/change');
-	var Assign = require('ast/assign');
-	var Propagation = require('ast/propagation');
-	var Deprecation = require('ast/deprecation');
-	var Dereference = require('ast/deref');
+	var CellCreation = require('ast/cell-creation');
 	var Fusion = require('ast/fusion');
 	var Pc = require('ast/pc');
-	var Folding = require('ast/fold');
 
+	var Token = require('parser/token');
 	var Lexer = require('parser/lexer');
 	var Parser = require('parser/parser');
 
@@ -63,19 +56,19 @@ define('goi-machine', function(require) {
 	var Recur = require('nodes/recur');
 	var Start = require('nodes/start');
 	var UnOp = require('nodes/unop');
-	var Weak = require('nodes/weak');
-	var Delta = require('nodes/delta');
-	var Set = require('nodes/set');
-	var Dep = require('nodes/dep');
 	var Deref = require('nodes/deref');
-	var Mod = require('nodes/mod');
-	var Prop = require('nodes/prop');
-	var Prov = require('nodes/prov');
 	var PatTuple = require('nodes/pattuple');
 	var Pair = require('nodes/pair');
 	var Fuse = require('nodes/fusion');
-	var ProvCon = require('nodes/pc');
 	var Fold = require('nodes/fold');
+
+	var Assign = require('nodes/assign');
+	var Linking = require('nodes/linking');
+	var CellCreate = require('nodes/cell-create');
+	var Cell = require('nodes/cell');
+	var Step = require('nodes/step');
+	var ProvCon = require('nodes/pc');
+	var Peek = require('nodes/peek');
 
 	var GC = require('gc');
 
@@ -83,7 +76,7 @@ define('goi-machine', function(require) {
 		
 		constructor() {
 			this.graph = new Graph(this);
-			graph = this.graph; // cheating!
+			graph = this.graph; // cheating! 
 			this.token = new MachineToken(this); 
 			this.gc = new GC(this.graph);
 			this.count = 0;
@@ -163,7 +156,7 @@ define('goi-machine', function(require) {
 					if (paramUsed[i]) {
 						auxs.splice(auxs.indexOf(auxNodes[i]), 1);
 					} else {
-						auxNodes[i] = new Weak(params[i]).addToGroup(abs.group);
+						auxNodes[i] = new Contract(params[i]).addToGroup(abs.group);
 					}	
 				}
 				if (ast.pattern.type == PatternType.Id)
@@ -200,29 +193,6 @@ define('goi-machine', function(require) {
 				var constant = new Const(ast.value).addToGroup(wrapper.box);
 				new Link(wrapper.prin.key, constant.key, "n", "s").addToGroup(wrapper);
 				return new Term(wrapper.prin, wrapper.auxs);
-			}
-
-			else if (ast instanceof BinaryOp) {
-				var binop = new BinOp(ast.name).addToGroup(group);
-
-				binop.subType = ast.type;
-				var left = this.toGraph(ast.v1, group);
-				var right = this.toGraph(ast.v2, group);
-
-				new Link(binop.key, left.prin.key, "w", "s").addToGroup(group);
-				new Link(binop.key, right.prin.key, "e", "s").addToGroup(group);
-
-				return new Term(binop, Term.joinAuxs(left.auxs, right.auxs, group));
-			}
-
-			else if (ast instanceof UnaryOp) {
-				var unop = new UnOp(ast.name).addToGroup(group);
-				unop.subType = ast.type;
-				var box = this.toGraph(ast.v1, group);
-
-				new Link(unop.key, box.prin.key, "n", "s").addToGroup(group);
-
-				return new Term(unop, box.auxs);
 			}
 
 			else if (ast instanceof IfThenElse) {
@@ -264,7 +234,7 @@ define('goi-machine', function(require) {
 				if (p1Used) {
 					// wrapper.auxs.splice(wrapper.auxs.indexOf(auxNode1), 1);
 				} else {
-					auxNode1 = new Weak(p1).addToGroup(wrapper.box);
+					auxNode1 = new Contract(p1).addToGroup(wrapper.box);
 				}
 				new Link(auxNode1.key, recur.key, "nw", "w", true).addToGroup(wrapper);
 				return new Term(wrapper.prin, wrapper.auxs);
@@ -281,11 +251,95 @@ define('goi-machine', function(require) {
 				return new Term(pair, Term.joinAuxs(left.auxs, right.auxs, group));
 			}
 
-			else if (ast instanceof ProvisionalConstant) {
+			else if (ast instanceof CellCreation) {
 				var term = this.toGraph(ast.term, group);
-				var prov = new Prov().addToGroup(group);
-				new Link(prov.key, term.prin.key, "n", "s").addToGroup(group);
-				return new Term(prov, term.auxs);
+				var mnode = new CellCreate().addToGroup(group);
+				new Link(mnode.key, term.prin.key, "n", "s").addToGroup(group);
+				return new Term(mnode, term.auxs);
+			}
+
+			else if (ast instanceof Pc) {
+				var data = ast.data;
+				var pc = new ProvCon(data).addToGroup(group);
+
+				return new Term(pc, []);
+			}
+
+			else if (ast instanceof Fusion) {
+				var params;
+				var paramUsed;
+				var auxNodes;
+				params = [ast.id]; 
+				paramUsed = [false];
+				auxNodes = [null];
+
+				var wrapper = BoxWrapper.create().addToGroup(group);
+				var abs = new Abs().addToGroup(wrapper.box);
+				var term = this.toGraph(ast.body, wrapper.box);
+				new Link(wrapper.prin.key, abs.key, "n", "s").addToGroup(wrapper);
+
+				new Link(abs.key, term.prin.key, "e", "s").addToGroup(abs.group);
+
+				var auxs = Array.from(term.auxs);
+				
+				for (var i=0;i<params.length;i++) {
+					for (let aux of term.auxs) {
+						if (aux.name == params[i]) {
+							paramUsed[i] = true;
+							auxNodes[i] = aux;
+							break;
+						}
+					}
+				}
+				for (var i=0;i<params.length;i++) {
+					if (paramUsed[i]) {
+						auxs.splice(auxs.indexOf(auxNodes[i]), 1);
+					} else {
+						auxNodes[i] = new Contract(params[i]).addToGroup(abs.group);
+					}	
+				}
+
+				var fuse = new Fuse().addToGroup(group);
+				new Link(auxNodes[0].key, fuse.key, "n", "s").addToGroup(fuse.group);
+				new Link(fuse.key, abs.key, "nw", "w", true).addToGroup(abs.group);
+
+				wrapper.auxs = wrapper.createPaxsOnTopOf(auxs);
+
+				return new Term(wrapper.prin, wrapper.auxs);
+			}
+
+			else if (ast instanceof Operation) {
+				var wrapper = BoxWrapper.create().addToGroup(group);
+				var constant = new Const(1).addToGroup(wrapper.box);
+				new Link(wrapper.prin.key, constant.key, "n", "s").addToGroup(wrapper);
+				return new Term(wrapper.prin, wrapper.auxs); 
+			}
+
+
+
+			
+			/*
+			else if (ast instanceof BinaryOp) {
+				var binop = new BinOp(ast.name).addToGroup(group);
+
+				binop.subType = ast.type;
+				var left = this.toGraph(ast.v1, group);
+				var right = this.toGraph(ast.v2, group);
+
+				new Link(binop.key, left.prin.key, "w", "s").addToGroup(group);
+				new Link(binop.key, right.prin.key, "e", "s").addToGroup(group);
+
+				return new Term(binop, Term.joinAuxs(left.auxs, right.auxs, group));
+			}
+
+			else if (ast instanceof UnaryOp) {
+				var unop = new UnOp(ast.name).addToGroup(group);
+				unop.subType = ast.type;
+				var box = this.toGraph(ast.v1, group);
+
+				new Link(unop.key, box.prin.key, "n", "s").addToGroup(group);
+
+				return new Term(unop, box.auxs);
 			}
 
 			else if (ast instanceof Deprecation) {
@@ -329,7 +383,7 @@ define('goi-machine', function(require) {
 					auxs.push(v);
 
 				return new Term(delta, auxs);
-			}
+			} 
 
 			else if (ast instanceof Assign) {
 				var param = ast.param;
@@ -365,21 +419,7 @@ define('goi-machine', function(require) {
 				return new Term(prop, []);
 			}
 
-			else if (ast instanceof Pc) {
-				var data = ast.data;
-				var pc = new ProvCon(data).addToGroup(group);
-
-				return new Term(pc, []);
-			}
-
-			else if (ast instanceof Fusion) {
-				var abs = new Fuse().addToGroup(group);
-				var box = this.toGraph(ast.term, group);
-
-				new Link(abs.key, box.prin.key, "n", "s").addToGroup(group);
-
-				return new Term(abs, box.auxs);
-			}
+			
 
 			else if (ast instanceof Folding) {
 				var fold = new Fold().addToGroup(group);
@@ -392,6 +432,7 @@ define('goi-machine', function(require) {
 
 				return new Term(fold, Term.joinAuxs(left.auxs, right.auxs, group));
 			}
+			*/
 		}
 
 		deleteVarNode(group) {

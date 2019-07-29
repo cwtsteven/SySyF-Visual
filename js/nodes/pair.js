@@ -4,14 +4,9 @@ define(function(require) {
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
 	var Link = require('link');
-	var BoxWrapper = require('box-wrapper');
-	var Promo = require('nodes/promo');
-	var Const = require('nodes/const');
 	var PatternType = require('ast/pattern');
 	var Contract = require('nodes/contract');
 	var PatTuple = require('nodes/pattuple');
-	var Term = require('term');
-	var Weak = require('nodes/weak');
 	var Pair = require('token').Pair();
 
 	class PairNode extends Node {

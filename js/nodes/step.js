@@ -8,7 +8,7 @@ define(function(require) {
 	var Link = require('link');
 	var Pair = require('token').Pair();
 
-	class Prop extends Node {
+	class Step extends Node {
 		
 		constructor() {
 			super(null, "s", "indianred1");
@@ -50,9 +50,9 @@ define(function(require) {
 		}
 
 		copy() {
-			return new Prop();
+			return new Step();
 		}
 	}
 
-	return Prop;
+	return Step;
 });
