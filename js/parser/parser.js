@@ -122,7 +122,7 @@ define(function(require) {
           nextToken = this.lexer.lookahead();
         }
 
-        lhs = new Application(new Application(new Operation(op.type), lhs), rhs);
+        lhs = new Application(new Application(new Operation(op.type, op.value), lhs), rhs);
 
         /*
         if (op.type == Token.AND) {
@@ -241,7 +241,7 @@ define(function(require) {
               ) {
         var op = this.lexer.lookahead();
         this.lexer._nextToken();
-        return new Operation(op.type); 
+        return new Operation(op.type, op.value); 
       }
       else {
         return undefined;

@@ -7,14 +7,14 @@ define(function(require) {
 	var BoxWrapper = require('box-wrapper');
 	var Promo = require('nodes/promo');
 	var Const = require('nodes/const');
-	var BinOpType = require('op').BinOpType;
+	var Token = require('parser/token');
 	var Pair = require('token').Pair();
 
 	class BinOp extends Node {
 
-		constructor(text) {
+		constructor(text, subType) {
 			super(null, text, "mediumpurple1");
-			this.subType = null;
+			this.subType = subType;
 		}
 		
 		transition(token, link) {
@@ -77,14 +77,14 @@ define(function(require) {
 
 		binOpApply(type, v1, v2) {
 			switch(type) {
-				case BinOpType.And: return v1 && v2;
-				case BinOpType.Or: return v1 || v2;
-				case BinOpType.Plus: return parseFloat(v1) + parseFloat(v2);
-				case BinOpType.Sub: return parseFloat(v1) - parseFloat(v2);
-				case BinOpType.Mult: return parseFloat(v1) * parseFloat(v2);
-				case BinOpType.Div: return parseFloat(v1) / parseFloat(v2);
-				case BinOpType.Lte: return parseFloat(v1) <= parseFloat(v2);
-				case BinOpType.VecPlus: 
+				case Token.AND: return v1 && v2;
+				case Token.OR: return v1 || v2;
+				case Token.PLUS: return parseFloat(v1) + parseFloat(v2);
+				case Token.SUB: return parseFloat(v1) - parseFloat(v2);
+				case Token.MULT: return parseFloat(v1) * parseFloat(v2);
+				case Token.DIV: return parseFloat(v1) / parseFloat(v2);
+				case Token.LTE: return parseFloat(v1) <= parseFloat(v2);
+				case Token.VECPLUS: 
 					if (v1.length != v2.length)
 						return null;
 					var result = [];
@@ -92,13 +92,13 @@ define(function(require) {
 						result[i] = (v1[i] + v2[i]);
 					}
 					return result;
-				case BinOpType.VecMult:
+				case Token.VECMULT:
 					var result = [];
 					for (var i=0; i<v2.length; i++) {
 						result[i] = (v1 * v2[i]);
 					}
 					return result;
-				case BinOpType.VecDot:
+				case Token.VECDOT:
 					if (v1.length != v2.length)
 						return null;
 					var result = 0;
@@ -109,39 +109,8 @@ define(function(require) {
 			}
 		}
 
-		static createPlus() {
-			var node = new BinOp("+");
-			node.subType = BinOpType.Plus;
-			return node;
-		}
-
-		static createMult() {
-			var node = new BinOp("*");
-			node.subType = BinOpType.Mult;
-			return node;
-		}
-
-		static createPlus() {
-			var op = new VecBinOp('⊞');
-			op.subType = BinOpType.VecPlus;
-			return op;
-		}
-
-		static createMult() {
-			var op = new VecBinOp('⊠');
-			op.subType = BinOpType.VecMult;
-			return op;
-		}
-
-		static createDot() {
-			var op = new VecBinOp('⊡');
-			op.subType = BinOpType.VecDot;
-			return op;
-		}
-
 		copy() {
-			var newNode = new BinOp(this.text);
-			newNode.subType = this.subType;
+			var newNode = new BinOp(this.text, this.subType);
 			return newNode;
 		}
 	}

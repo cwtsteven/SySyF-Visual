@@ -64,7 +64,7 @@ define(function(require) {
           break;
 
         case ',':
-          this._token = new Token(Token.COMMA, null, 1);
+          this._token = new Token(Token.COMMA, ',', 1);
           break;
 
         case ';':
@@ -97,7 +97,7 @@ define(function(require) {
 
         case '&':
           if (this._nextChar() == '&')
-            this._token = new Token(Token.AND, null, 5);
+            this._token = new Token(Token.AND, '&&', 5);
           else {
             this._index--;
             this.fail();
@@ -107,7 +107,7 @@ define(function(require) {
         case '|':
           var c2 = this._nextChar();
           if (c2 == '|')
-            this._token = new Token(Token.OR, null, 4);
+            this._token = new Token(Token.OR, '||', 4);
           else {
             this._index--;
             this.fail();
@@ -115,24 +115,24 @@ define(function(require) {
           break;
 
         case '+':
-          this._token = new Token(Token.PLUS, null, 12);
+          this._token = new Token(Token.PLUS, '+', 12);
           break;
 
         case '-':
-          this._token = new Token(Token.SUB, null, 12);
+          this._token = new Token(Token.SUB, '-', 12);
           break;
 
         case '*':
-          this._token = new Token(Token.MULT, null, 13);
+          this._token = new Token(Token.MULT, '*', 13);
           break;
 
         case '/':
-          this._token = new Token(Token.DIV, null, 13);
+          this._token = new Token(Token.DIV, '/', 13);
           break;
 
         case '<':
           if (this._nextChar() == '=')
-            this._token = new Token(Token.LTE, null, 10);
+            this._token = new Token(Token.LTE, '<=', 10);
           else {
             this._index--;
             this.fail();
@@ -144,15 +144,15 @@ define(function(require) {
           break;
 
         case '⊞':
-          this._token = new Token(Token.VECPLUS, null, 12);
+          this._token = new Token(Token.VECPLUS, '⊞', 12);
           break;
 
         case '⊠':
-          this._token = new Token(Token.VECMULT, null, 13);
+          this._token = new Token(Token.VECMULT, '⊠', 13);
           break;
 
         case '⊡':
-          this._token = new Token(Token.VECDOT, null, 13);
+          this._token = new Token(Token.VECDOT, '⊡', 13);
           break;
 
         case 'F':

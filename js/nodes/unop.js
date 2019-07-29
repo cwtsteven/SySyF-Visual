@@ -6,14 +6,14 @@ define(function(require) {
 	var Link = require('link');
 	var BoxWrapper = require('box-wrapper');
 	var Const = require('nodes/const');
-	var UnOpType = require('op').UnOpType;
+	var Token = require('parser/token');
 	var Pair = require('token').Pair();
 
 	class UnOp extends Node {
 
-		constructor(text) {
+		constructor(text, subType) {
 			super(null, text, "mediumpurple1");
-			this.subType = null;
+			this.subType = subType;
 		}
 
 		transition(token, link) {
@@ -63,13 +63,12 @@ define(function(require) {
 
 		unOpApply(type, v1) {
 			switch(type) {
-				case UnOpType.Not: return !v1;
+				case Token.NOT: return !v1;
 			}
 		}
 
 		copy() {
-			var newNode = new UnOp(this.text);
-			newNode.subType = this.subType;
+			var newNode = new UnOp(this.text, this.subType);
 			return newNode;
 		}
 

@@ -309,10 +309,29 @@ define('goi-machine', function(require) {
 			}
 
 			else if (ast instanceof Operation) {
-				var wrapper = BoxWrapper.create().addToGroup(group);
-				var constant = new Const(1).addToGroup(wrapper.box);
-				new Link(wrapper.prin.key, constant.key, "n", "s").addToGroup(wrapper);
-				return new Term(wrapper.prin, wrapper.auxs); 
+				var node; 
+				switch (ast.type) {
+					case Token.ADD: 
+					case Token.OR:
+					case Token.PLUS:
+					case Token.SUB:
+					case Token.MULT:
+					case Token.DIV:
+					case Token.LTE:
+					case Token.COMMA:
+					case Token.VECPLUS:
+					case Token.VECMULT:
+					case Token.VECDOT: 
+						node = new BinOp(ast.type, ast.name).addToGroup(group); return this.createBinOp(node, group);
+					case Token.LINK:
+					case Token.ASSIGN:
+					case Token.FOLD: 
+					break;
+					case Token.PEEK:
+					case Token.DEREF:
+					break;
+					case Token.STEP:
+				}
 			}
 
 
@@ -433,6 +452,33 @@ define('goi-machine', function(require) {
 				return new Term(fold, Term.joinAuxs(left.auxs, right.auxs, group));
 			}
 			*/
+		}
+
+		createBinOp(node, group) {
+			var wrapper1 = BoxWrapper.create().addToGroup(group);
+			var abs1 = new Abs().addToGroup(wrapper1.box);
+			new Link(wrapper1.prin.key, abs1.key, "n", "s").addToGroup(wrapper1.box);
+
+			var wrapper2 = BoxWrapper.create().addToGroup(wrapper1.box);
+			var abs2 = new Abs().addToGroup(wrapper2.box);
+			new Link(wrapper2.prin.key, abs2.key, "n", "s").addToGroup(wrapper2.box);
+
+			node.addToGroup(wrapper2.box); 
+			var vl = new Var('x').addToGroup(wrapper2.box);
+			var vr = new Var('y').addToGroup(wrapper2.box);
+			new Link(node.key, vl.key, "w", "s").addToGroup(wrapper2.box);
+			new Link(node.key, vr.key, "e", "s").addToGroup(wrapper2.box);
+
+			new Link(abs2.key, node.key, "e", "s").addToGroup(abs2.group);
+			new Link(vr.key, abs2.key, "nw", "w").addToGroup(abs2.group);
+
+			wrapper2.aux = wrapper2.createPaxsOnTopOf([vl]);
+
+			new Link(wrapper2.aux[0].key, abs1.key, "nw", "w", true).addToGroup(abs1.group);
+
+			wrapper1.aux = [];
+
+			return new Term(wrapper1.prin, wrapper1.auxs);
 		}
 
 		deleteVarNode(group) {
