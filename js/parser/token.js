@@ -61,6 +61,8 @@ define(function() {
     'PEEK',
     'DEREF', 
     'FUSE',
+    'FUSION',
+    'FROM',
     'PC',
     'FOLD', 
 

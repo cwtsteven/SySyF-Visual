@@ -110,9 +110,9 @@ define('ast/cell-creation', function() {
 
 define('ast/fusion', function() {
   class Fusion {
-    constructor(id, term) {
+    constructor(id, body) {
       this.id = id;
-      this.term = term;
+      this.body = body;
     }
   }
   return Fusion;

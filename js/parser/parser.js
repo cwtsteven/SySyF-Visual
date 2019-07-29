@@ -34,6 +34,7 @@ define(function(require) {
     //        | IF term THEN term ELSE term
     //        | FUSE LPAREM LCID RPAREM LCID DOT term
     //        | BIGLAMBDA LCID DOT term
+    //        | FUSION(a) LCID FROM term IN term 
     //        | application
     term(ctx) {
       if (this.lexer.skip(Token.LAMBDA)) {
@@ -82,15 +83,26 @@ define(function(require) {
       }
       else if (this.lexer.skip(Token.FUSE)) {
         this.lexer.match(Token.LPAREN);
-        var name = this.lexer.token(Token.LCID);
+        const name = this.lexer.token(Token.LCID);
         this.lexer.match(Token.RPAREN);
-        var id = this.lexer.token(Token.LCID);
+        const id = this.lexer.token(Token.LCID);
         this.lexer.match(Token.DOT);
         const term = this.term(ctx);
         return new Fusion(id, term); 
       }
+      else if (this.lexer.skip(Token.FUSION)) {
+        this.lexer.match(Token.LPAREN);
+        const name = this.lexer.token(Token.LCID);
+        this.lexer.match(Token.RPAREN);
+        const id = this.lexer.token(Token.LCID);
+        this.lexer.match(Token.FROM)
+        const N = this.term(ctx);
+        this.lexer.match(Token.IN);
+        const M = this.term([id].concat(ctx));
+        return new Application(new Fusion(id, M), N);
+      }
       else if (this.lexer.skip(Token.BIGLAMBDA)) {
-        var id = this.lexer.token(Token.LCID);
+        const id = this.lexer.token(Token.LCID);
         this.lexer.match(Token.DOT);
         const term = this.term(ctx);
         return term; 

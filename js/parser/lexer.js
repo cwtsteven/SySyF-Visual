@@ -192,8 +192,10 @@ define(function(require) {
               this._token = new Token(Token.PEEK);
             else if (str == "deref")
               this._token = new Token(Token.DEREF);
-            else if (str == "fusion")
-              this._token = new Token(Token.FUSE);
+            else if (str == "fuse")
+              this._token = new Token(Token.FUSION);
+            else if (str == "from")
+              this._token = new Token(Token.FROM);
             else if (str == "pc")
               this._token = new Token(Token.PC);
             else if (str == "fold")
