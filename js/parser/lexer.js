@@ -92,7 +92,7 @@ define(function(require) {
           break;
 
         case '~':
-          this._token = new Token(Token.NOT);
+          this._token = new Token(Token.NOT, '~');
           break;
 
         case '&':

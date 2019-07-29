@@ -322,15 +322,22 @@ define('goi-machine', function(require) {
 					case Token.VECPLUS:
 					case Token.VECMULT:
 					case Token.VECDOT: 
-						return this.createBinOp(ast.name, ast.type, group); 
+						var node = new BinOp(ast.name, ast.type); return this.createBinOp(node, group); 
 					case Token.LINK:
+						var node = new Linking(); return this.createBinOp(node, group); 
 					case Token.ASSIGN:
+						var node = new Assign(); return this.createBinOp(node, group); 
 					case Token.FOLD: 
-					break;
+						var node = new Fold(); return this.createBinOp(node, group);
+					case Token.NOT:
+						var node = new UnOp(ast.name, ast.type); return this.createUnOp(node, group); 
 					case Token.PEEK:
+						var node = new Peek(); return this.createUnOp(node, group);
 					case Token.DEREF:
-					break;
+						var node = new Deref(); return this.createUnOp(node, group);
 					case Token.STEP:
+						var node = new Step().addToGroup(group);
+						return Term(node, []);
 				}
 			}
 
@@ -454,7 +461,7 @@ define('goi-machine', function(require) {
 			*/
 		}
 
-		createBinOp(name, type, group) {
+		createBinOp(node, group) {
 			var wrapper1 = BoxWrapper.create().addToGroup(group);
 			var abs1 = new Abs().addToGroup(wrapper1.box);
 			new Link(wrapper1.prin.key, abs1.key, "n", "s").addToGroup(wrapper1);
@@ -463,7 +470,7 @@ define('goi-machine', function(require) {
 			var abs2 = new Abs().addToGroup(wrapper2.box);
 			new Link(wrapper2.prin.key, abs2.key, "n", "s").addToGroup(wrapper2);
 
-			var node = new BinOp(name, type).addToGroup(wrapper2.box); 
+			node.addToGroup(wrapper2.box); 
 			var vl = new Var('x').addToGroup(wrapper2.box);
 			var vr = new Var('y').addToGroup(wrapper2.box);
 			new Link(node.key, vl.key, "w", "s").addToGroup(wrapper2.box);
@@ -480,6 +487,21 @@ define('goi-machine', function(require) {
 			wrapper1.auxs = [];
 
 			return new Term(wrapper1.prin, wrapper1.auxs); 
+		}
+
+		createUnOp(node, group) {
+			var wrapper2 = BoxWrapper.create().addToGroup(group);
+			var abs2 = new Abs().addToGroup(wrapper2.box);
+			new Link(wrapper2.prin.key, abs2.key, "n", "s").addToGroup(wrapper2);
+
+			node.addToGroup(wrapper2.box); 
+
+			new Link(abs2.key, node.key, "e", "s").addToGroup(abs2.group);
+			new Link(node.key, abs2.key, "nw", "w", true).addToGroup(abs2.group);
+
+			wrapper2.auxs = [] 
+
+			return new Term(wrapper2.prin, wrapper2.auxs);
 		}
 
 		deleteVarNode(group) {
