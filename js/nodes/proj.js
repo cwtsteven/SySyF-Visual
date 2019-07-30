@@ -17,7 +17,7 @@ define(function(require) {
 				token.dataStack.push(CompData.PROJ + this.index + "");
 				return nextLink;
 			}
-			else if (link.from == this.key) {
+			else if (link.from == this.key) { 
 				return this.findLinksInto(null)[0];
 			}
 		}
