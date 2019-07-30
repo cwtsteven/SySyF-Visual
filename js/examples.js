@@ -177,50 +177,51 @@ var rsum_ex =
 + 'let _ = step in\n' 
 + 'o'; 
 
-/*
+
 var linear_regression_ex = 
-let set = Λa.λx.λy.
-  let _ = link[a] x y in 
-  assign x y
-in
 
-let stabilise = λ_.rec f. 
-  if step then f 0 else false
-in
-
-let gradient_descent = Λa.λm.λps.λloss.
-  let rate = 0.001 in 
-  let d = 0.001 in 
-  let old_ps = peek[a] (deref[a] ps) in 
-  let g = λe.
-    let old_loss = loss m in 
-    let _ = set[a] ps 
-            (old_ps ⊞[a] (d ⊠[a] e)) 
-    in 
-    let new_loss = loss m in 
-    (((old_loss - new_loss) / d) * rate) ⊠[a] e 
-  in 
-  set[a] ps 
-         (fold[a] (λe.λps.(g e) ⊞[a] ps) old_ps)
-in
-
-let sq = λx.x * x
-in
-
-let loss = λy. 
-  let _ = set x 0 in 
-  let y1 = peek y in 
-  let _ = set x 2 in
-  let y2 = peek y in 
-  (sq (10 - y1) + sq (12 - y2)) / 2
-in
-
-let x = {0} in 
-let y = deref x * pc 1 + pc 0 in 
-fuse(a) ps from y in 
-let _ = gradient_descent[a] y ps loss in 
-let _ = set x 10 in 
-peek (deref x) 
+  'let set = Λa.λx.λy. \n' 
++ '  let _ = link[a] x y in \n'
++ '  assign x y \n'
++ 'in \n'
++ ' \n'
++ 'let stabilise = λ_.rec f.  \n'
++ '  if step then f 0 else false \n'
++ 'in \n'
++ ' \n'
++ 'let gradient_descent = Λa.λm.λps.λloss. \n'
++ '  let rate = 0.001 in  \n'
++ '  let d = 0.001 in  \n'
++ '  let old_ps = peek[a] (deref[a] ps) in  \n'
++ '  let g = λe. \n'
++ '    let old_loss = loss m in  \n'
++ '    let _ = set[a] ps  \n'
++ '            (old_ps ⊞[a] (d ⊠[a] e))  \n'
++ '    in  \n'
++ '    let new_loss = loss m in  \n'
++ '    (((old_loss - new_loss) / d) * rate) ⊠[a] e  \n'
++ '  in  \n'
++ '  set[a] ps  \n'
++ '         (fold[a] (λe.λps.(g e) ⊞[a] ps) old_ps) \n'
++ 'in \n'
++ ' \n'
++ 'let sq = λx.x * x \n'
++ 'in \n'
++ ' \n'
++ 'let loss = λy.  \n'
++ '  let _ = set x 0 in  \n'
++ '  let y1 = peek y in  \n'
++ '  let _ = set x 2 in \n'
++ ' let y2 = peek y in  \n'
++ '  (sq (10 - y1) + sq (12 - y2)) / 2 \n'
++ 'in \n'
++ ' \n'
++ 'let x = {0} in  \n'
++ 'let y = deref x * pc 1 + pc 0 in  \n'
++ 'fuse(a) ps from y in  \n'
++ 'let _ = gradient_descent[a] y ps loss in  \n'
++ 'let _ = set x 10 in  \n'
++ 'peek (deref x)  \n';
 
 var fusion_ex = 
   'let x = {pc 1 + pc 2} in \n' 
@@ -229,4 +230,3 @@ var fusion_ex =
 + 'let _ = link x pc 3 in \n' 
 + 'let qs = f 2 in \n' 
 + 'ps ⊞ qs';
-*/
