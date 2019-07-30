@@ -69,7 +69,7 @@ define(function() {
     'BIGLAMBDA',
     'LSQPAREM',
     'RSQPAREM',
-    //'SEQ',
+    'SEQ',
   ].forEach(token => Token[token] = token);
 
   return Token;

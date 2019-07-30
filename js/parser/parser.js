@@ -153,15 +153,20 @@ define(function(require) {
           lhs = this.parseBinop(ctx, lhs, 0);
         }
         else if (this.lexer.lookahead().type == Token.LSQPAREN) {
-            this.lexer.skip(Token.LSQPAREN);
-            var id = this.lexer.token(Token.LCID);
-            this.lexer.match(Token.RSQPAREN);
-            rhs = this.atom(ctx);
-            if (!rhs) {
-              return lhs;
-            } else {
-              lhs = new Application(lhs, rhs);
-            }
+          this.lexer.skip(Token.LSQPAREN);
+          var id = this.lexer.token(Token.LCID);
+          this.lexer.match(Token.RSQPAREN);
+          rhs = this.atom(ctx);
+          if (!rhs) {
+            return lhs;
+          } else {
+            lhs = new Application(lhs, rhs);
+          }
+        }
+        else if (this.lexer.lookahead().type == Token.SEQ) {
+          this.lexer.skip(Token.SEQ);
+          rhs = this.term(ctx);
+          return new Application(new Abstraction(new Pattern(PatternType.Id, '_'), rhs), lhs)
         }
         
         else {
