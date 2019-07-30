@@ -83,8 +83,6 @@ define(function(require) {
 				}
 			}
 
-			console.log(target);
-
 			var index = 0;
 			var vec = new Param().addToGroup(this.group);
 			var con = new Contract().addToGroup(this.group);

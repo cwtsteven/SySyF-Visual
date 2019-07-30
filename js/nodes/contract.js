@@ -11,7 +11,6 @@ define(function(require) {
 		}
 
 		transition(token, link) {
-			console.log("con-trans");
 			if (link.to == this.key) {
 				var nextLink = this.findLinksOutOf(null)[0];
 				token.boxStack.push(link);

@@ -600,7 +600,7 @@ define('goi-machine', function(require) {
 
 				token.rewrite = false;
 				nextLink = node.transition(token, token.link);
-				console.log(nextLink);
+				//console.log(nextLink);
 
 
 				if (nextLink != null) {
@@ -628,7 +628,7 @@ define('goi-machine', function(require) {
 				var target = token.forward ? token.link.from : token.link.to;
 				node = this.graph.findNodeByKey(target);
 				var nextLink = node.rewrite(token, token.link);
-				console.log(nextLink);
+				//console.log(nextLink);
 				if (!token.rewrite) {
 					token.transited = false;
 					this.tokenPass(token, flag, dataStack, boxStack); 

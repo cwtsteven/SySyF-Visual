@@ -33,9 +33,8 @@ define(function(require) {
 					if (token.dataStack[token.dataStack.length-2] == CompData.PROMPT) {
 						var data = token.dataStack.pop();
 						token.dataStack.pop();
-						token.dataStack.push(new Pair(CompData.UNIT,CompData.EMPTY));
-
-						token.rewriteFlag = RewriteFlag.F_DELTA + data.b;
+						token.dataStack.push(new Pair(data.a,data.b));
+						token.rewriteFlag = RewriteFlag.F_DELTA;
 						return this.findLinksInto(null)[0];
 					}
 				}
@@ -43,9 +42,11 @@ define(function(require) {
 		}
 
 		rewrite(token, nextLink) { 
-			if (token.rewriteFlag.substring(0,3) == RewriteFlag.F_DELTA && nextLink.to == this.key) {
-				var key = token.rewriteFlag.substring(3,token.rewriteFlag.length);
+			if (token.rewriteFlag == RewriteFlag.F_DELTA && nextLink.to == this.key) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
+
+				var key = token.dataStack.pop().b;
+				token.dataStack.push(new Pair(CompData.UNIT,CompData.EMPTY));
 
 				var data = token.dataStack.last();
 				var weak1 = new Contract().addToGroup(this.group);

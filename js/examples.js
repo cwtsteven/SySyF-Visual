@@ -179,7 +179,6 @@ var rsum_ex =
 
 
 var linear_regression_ex = 
-
   'let set = Λa.λx.λy. \n' 
 + '  link[a] x y; \n'
 + '  assign[a] x y \n'
@@ -191,31 +190,32 @@ var linear_regression_ex =
 + '  let old_ps = peek[a] (deref[a] ps) in  \n'
 + '  let g = λe. \n'
 + '    let old_loss = loss m in  \n'
-+ '    set[a] ps (old_ps ⊞[a] (d ⊠[a] e));  \n'
++ '    assign[a] ps (old_ps ⊞[a] (d ⊠[a] e));  \n'
 + '    let new_loss = loss m in  \n'
 + '    (((old_loss - new_loss) / d) * rate) ⊠[a] e  \n'
 + '  in  \n'
-+ '  set[a] ps  \n'
++ '  assign[a] ps  \n'
 + '         (fold[a] (λe.λps.(g e) ⊞[a] ps) old_ps) \n'
 + 'in \n'
 + ' \n'
 + 'let sq = λx.x * x \n'
 + 'in \n'
 + ' \n'
++ 'let x = {0} in  \n'
++ 'let y = (deref x) * (pc 1) + (pc 0) in  \n'
++ ' \n'
 + 'let loss = λy.  \n'
 + '  set x 0; \n'
 + '  let y1 = peek y in  \n'
 + '  set x 2; \n'
 + '  let y2 = peek y in  \n'
-+ '  (sq (10 - y1) + sq (12 - y2)) / 2 \n'
++ '  ((sq (10 - y1)) + (sq (12 - y2))) / 2 \n'
 + 'in \n'
 + ' \n'
-+ 'let x = {0} in  \n'
-+ 'let y = deref x * pc 1 + pc 0 in  \n'
 + 'fuse(a) ps from y in  \n'
 + 'gradient_descent[a] y ps loss;  \n'
 + 'set x 10;  \n'
-+ 'peek (deref x)  \n';
++ 'peek (deref y)  \n';
 
 var fusion_ex = 
   'let x = {pc 1 + pc 2} in \n' 

@@ -43,9 +43,7 @@ define(function(require) {
 					outLink.changeFrom(weak.key, "n");
 
 					var wrapper = BoxWrapper.create().addToGroup(this.group);
-					var newConst = new Const(data.a.toString()).addToGroup(wrapper.box);
-					console.log("here");
-					console.log(newConst);
+					var newConst = new Const(data.a).addToGroup(wrapper.box);
 					new Link(wrapper.prin.key, newConst.key, "n", "s").addToGroup(wrapper);
 					nextLink.changeTo(wrapper.prin.key, "s");
 					

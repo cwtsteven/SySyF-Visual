@@ -90,13 +90,13 @@ define(function(require) {
 						return null;
 					var result = [];
 					for (var i=0; i<v1.length; i++) {
-						result[i] = (parseFloat(v1[i]) + parseFloat(v2[i])); 
+						result[i] = parseFloat(v1[i]) + parseFloat(v2[i]); 
 					}
 					return result;
 				case Token.VECMULT:
 					var result = [];
 					for (var i=0; i<v2.length; i++) {
-						result[i] = (parseFloat(v1) * parseFloat(v2[i]));
+						result[i] = parseFloat(v1) * parseFloat(v2[i]);
 					}
 					return result;
 				case Token.VECDOT:

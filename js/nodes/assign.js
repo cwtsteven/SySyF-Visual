@@ -16,8 +16,6 @@ define(function(require) {
 
 		constructor() {
 			super(null, "a", "indianred1");
-			this.rKey = null;
-			this.data = null;
 		}
 		
 		transition(token, link) {
@@ -39,10 +37,8 @@ define(function(require) {
 						var data = token.dataStack.pop();
 						var new_v = token.dataStack.pop();
 						token.dataStack.pop();
-						token.dataStack.push(new Pair(CompData.UNIT,CompData.EMPTY));
-						this.rKey = data.b;
-						this.data = new_v.a;
-						token.rewriteFlag = RewriteFlag.F_ASSIGN + this.rKey +';'+ this.data;
+						token.dataStack.push(new Pair(new_v.a, data.b));
+						token.rewriteFlag = RewriteFlag.F_ASSIGN; 
 						return this.findLinksInto(null)[0];
 					}
 				}
@@ -50,10 +46,13 @@ define(function(require) {
 		}
 
 		rewrite(token, nextLink) { 
-			if (token.rewriteFlag.substring(0,3) == RewriteFlag.F_ASSIGN && nextLink.to == this.key) {
-				var key = this.rKey;
-				var data = this.data;
+			if (token.rewriteFlag == RewriteFlag.F_ASSIGN && nextLink.to == this.key) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
+
+				var pair = token.dataStack.pop();
+				var data = pair.a; 
+				var key = pair.b;
+				token.dataStack.push(new Pair(CompData.UNIT,CompData.EMPTY));
 
 				if (key == CompData.DEP) {
 					for (var i=0; i<data.length; i++) {
@@ -87,7 +86,6 @@ define(function(require) {
 		}
 
 		update(node, k, n) {
-			var k;
 			while (true) {
 				if (node instanceof Const) {
 					node.name = n;

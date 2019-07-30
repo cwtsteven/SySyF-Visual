@@ -35,18 +35,19 @@ define(function(require) {
 					var l = token.dataStack.pop();
 					var r = token.dataStack.pop();
 				 			token.dataStack.pop();
-					token.dataStack.push(new Pair([],CompData.EMPTY));
-					token.rewriteFlag = RewriteFlag.F_FOLD+r.a.length;	
+					token.dataStack.push(new Pair(r.a.length, CompData.EMPTY));
+					token.rewriteFlag = RewriteFlag.F_FOLD;	
 					return this.findLinksInto(null)[0];;
 				}	
 			}
 		}
 
 		rewrite(token, nextLink) {
-			if (token.rewriteFlag.substring(0,3) == RewriteFlag.F_FOLD && nextLink.to == this.key) {
-				var len = parseInt(token.rewriteFlag.substring(3));
+			if (token.rewriteFlag == RewriteFlag.F_FOLD && nextLink.to == this.key) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
-				token.dataStack.pop();
+				var data = token.dataStack.pop();
+				var len = parseInt(data.a);
+				console.log("LENGTHHHHHHH" + len);
 				token.dataStack.push(CompData.PROMPT);
 
 				var left = this.graph.findNodeByKey(this.findLinksOutOf("w")[0].to);
