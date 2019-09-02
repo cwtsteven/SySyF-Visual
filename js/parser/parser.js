@@ -14,6 +14,8 @@ define(function(require) {
   var CellCreation = require('ast/cell-creation');
   var Fusion = require('ast/fusion');
   var Pc = require('ast/pc'); 
+  var NameAbstraction = require('ast/name-abstraction');
+  var NameInstantiation = require('ast/name-instantiation');
 
   class Parser {
     constructor(lexer) {
@@ -23,7 +25,7 @@ define(function(require) {
     parse() {
       const result = this.term([]);
       // make sure we consumed all the program, otherwise there was a syntax error
-      this.lexer.match(Token.EOF);
+      this.lexer.match(Token.EOF); 
 
       return result;
     }
@@ -88,7 +90,7 @@ define(function(require) {
         const id = this.lexer.token(Token.LCID);
         this.lexer.match(Token.DOT);
         const term = this.term(ctx);
-        return new Fusion(id, term); 
+        return new Fusion(name, id, term); 
       }
       else if (this.lexer.skip(Token.FUSION)) {
         this.lexer.match(Token.LPAREN);
@@ -99,13 +101,13 @@ define(function(require) {
         const N = this.term(ctx);
         this.lexer.match(Token.IN);
         const M = this.term([id].concat(ctx));
-        return new Application(new Fusion(id, M), N);
+        return new Application(new Fusion(name, id, M), N);
       }
       else if (this.lexer.skip(Token.BIGLAMBDA)) {
         const id = this.lexer.token(Token.LCID);
         this.lexer.match(Token.DOT);
         const term = this.term(ctx);
-        return term; 
+        return new NameAbstraction(id, term); 
       }
       else {
         return this.application(ctx);
@@ -126,11 +128,14 @@ define(function(require) {
       while (this.isBinaryOp(nextToken) && nextToken.pred >= pred) {
         var op = nextToken;
         this.lexer._nextToken();
-        nextToken = this.lexer.lookahead();
+        nextToken = this.lexer.lookahead(); 
+        var binop = new Operation(op.type, op.value);
         if (nextToken.type == Token.LSQPAREN) {
             this.lexer.skip(Token.LSQPAREN);
             var id = this.lexer.token(Token.LCID);
             this.lexer.match(Token.RSQPAREN);   
+            binop.hasPname = true; 
+            binop = new NameInstantiation(id, binop);
         }
         var rhs = this.atom(ctx);
         //var rhs = this.term(ctx);
@@ -139,7 +144,7 @@ define(function(require) {
           rhs = this.parseBinop(ctx, rhs, nextToken.pred);
           nextToken = this.lexer.lookahead();
         }
-        lhs = new Application(new Application(new Operation(op.type, op.value), lhs), rhs);
+        lhs = new Application(new Application(binop, lhs), rhs);
       }
       return lhs;
     }
@@ -156,12 +161,16 @@ define(function(require) {
           this.lexer.skip(Token.LSQPAREN);
           var id = this.lexer.token(Token.LCID);
           this.lexer.match(Token.RSQPAREN);
+          /*
           rhs = this.atom(ctx);
           if (!rhs) {
             return lhs;
           } else {
-            lhs = new Application(lhs, rhs);
+            lhs = new NameInstantiation(lhs, rhs);
           }
+          */
+          lhs.hasPname = true;
+          lhs = new NameInstantiation(id, lhs);
         }
         else if (this.lexer.lookahead().type == Token.SEQ) {
           this.lexer.skip(Token.SEQ);
@@ -212,7 +221,7 @@ define(function(require) {
       else if (this.lexer.skip(Token.CLPAREN)) {
         var term = this.term(ctx);
         this.lexer.match(Token.CRPAREN);
-        return new CellCreation(term);
+        return new Application(new Operation(Token.CELLCREATE, null), term); 
       }
       else if (this.lexer.skip(Token.PC)) {
         const n = this.lexer.token(Token.INT);

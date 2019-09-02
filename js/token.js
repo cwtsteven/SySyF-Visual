@@ -5,14 +5,16 @@ define(function() {
 		EMPTY: '-',
 		PROMPT: '*',
 		LAMBDA: 'λ',
-		UNIT: '•',
+		UNIT: '()',
 		IF0: 'if0',
 		IF1: 'if1',
+		DEP : 'g',
+		BIGLAMBDA: 'Λ',
+		
 		PL: 'L',
 		PR: 'R',
 		PE: 'P',
-		DEP : 'g',
-		PROJ: 'π',
+		//PROJ: 'π',
 	}
 
 	var RewriteFlag = {
@@ -23,14 +25,16 @@ define(function() {
 		F_C: '<C>',
 		F_PROMO: '<!>',
 		F_RECUR: '<μ>',
-		F_MOD: '<m>',
-		F_DEP: '<p>',
-		F_DELTA: '<L>',
-		F_ASSIGN: '<A>',
-		F_PROP: '<s>',
+		F_CREATE: '<m>',
+		F_PEEK: '<p>',
+		F_LINK: '<l>',
+		F_ASSIGN: '<a>',
+		F_FUSE: '<F>',
+		F_FOLD: '<f>',
+		F_STEP: '<s>',
+		F_BIGLAMBDA: '<Λ>',
+
 		F_PAIR: '<,>',
-		F_FUSE: '<f>',
-		F_FOLD: '<F>',
 	}
 
 	class Pair {

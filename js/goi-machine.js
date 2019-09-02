@@ -1,5 +1,6 @@
 var graph = null;
 
+
 function union_arrays (x, y) {
   var obj = {};
   for (var i = x.length-1; i >= 0; -- i)
@@ -14,6 +15,14 @@ function union_arrays (x, y) {
   return res;
 }
 
+var names = 0;
+
+function newName() {
+	var name = "α" + names;
+	names++; 
+	return name;
+} 
+
 
 define('goi-machine', function(require) {
 	var PatternType = require('parser/pattern');
@@ -23,12 +32,14 @@ define('goi-machine', function(require) {
 	var Identifier = require('ast/identifier');
 	var Constant = require('ast/constant');
 	var Operation = require('ast/operation');
-	var IfThenElse = require('ast/if-then-else');
+	var IfThenElse = require('ast/if-then-else'); 
 	var Recursion = require('ast/recursion');
 	var Tuple = require('ast/tuple');
 	var CellCreation = require('ast/cell-creation');
 	var Fusion = require('ast/fusion');
 	var Pc = require('ast/pc');
+  	var NameAbstraction = require('ast/name-abstraction');
+  	var NameInstantiation = require('ast/name-instantiation');
 
 	var Token = require('parser/token');
 	var Lexer = require('parser/lexer');
@@ -70,6 +81,9 @@ define('goi-machine', function(require) {
 	var ProvCon = require('nodes/pc');
 	var Peek = require('nodes/peek');
 
+	var BigLambda = require('nodes/biglambda');
+	var NameInstance = require('nodes/name-instance');
+
 	var GC = require('gc');
 
 	class GoIMachine {
@@ -97,6 +111,7 @@ define('goi-machine', function(require) {
 			this.graph.clear();
 			this.token.reset();
 			this.count = 0;
+			names = 0;
 
 			this.evalTokens = [];
 			this.cells = [];
@@ -251,13 +266,6 @@ define('goi-machine', function(require) {
 				return new Term(pair, Term.joinAuxs(left.auxs, right.auxs, group));
 			}
 
-			else if (ast instanceof CellCreation) {
-				var term = this.toGraph(ast.term, group);
-				var mnode = new CellCreate().addToGroup(group);
-				new Link(mnode.key, term.prin.key, "n", "s").addToGroup(group);
-				return new Term(mnode, term.auxs);
-			}
-
 			else if (ast instanceof Pc) {
 				var data = ast.data;
 				var pc = new ProvCon(data).addToGroup(group);
@@ -270,17 +278,20 @@ define('goi-machine', function(require) {
 				var paramUsed;
 				var auxNodes;
 				params = [ast.id]; 
+				var orig_name = ast.name; 
+				var name = newName();
 				paramUsed = [false];
 				auxNodes = [null];
 
 				var wrapper = BoxWrapper.create().addToGroup(group);
-				var abs = new Abs().addToGroup(wrapper.box);
-				var term = this.toGraph(ast.body, wrapper.box);
+				var abs = new Fuse(name).addToGroup(wrapper.box);
+				var term = this.toGraph(ast.body, wrapper.box); 
+				
 				new Link(wrapper.prin.key, abs.key, "n", "s").addToGroup(wrapper);
 
 				new Link(abs.key, term.prin.key, "e", "s").addToGroup(abs.group);
 
-				var auxs = Array.from(term.auxs);
+				var auxs = Array.from(term.auxs); 
 				
 				for (var i=0;i<params.length;i++) {
 					for (let aux of term.auxs) {
@@ -299,17 +310,18 @@ define('goi-machine', function(require) {
 					}	
 				}
 
-				var fuse = new Fuse().addToGroup(group);
-				new Link(auxNodes[0].key, fuse.key, "n", "s").addToGroup(fuse.group);
-				new Link(fuse.key, abs.key, "nw", "w", true).addToGroup(abs.group);
+				new Link(auxNodes[0].key, abs.key, "nw", "w", true).addToGroup(abs.group);
+
 
 				wrapper.auxs = wrapper.createPaxsOnTopOf(auxs);
+				wrapper.updateNames(orig_name, name);
 
 				return new Term(wrapper.prin, wrapper.auxs);
 			}
 
 			else if (ast instanceof Operation) {
 				var node; 
+				var machine = this;
 				switch (ast.type) {
 					case Token.ADD: 
 					case Token.OR:
@@ -319,151 +331,104 @@ define('goi-machine', function(require) {
 					case Token.DIV:
 					case Token.LTE:
 					case Token.COMMA:
+						var node = new BinOp(ast.name, ast.type, false); return this.createBinOp(node, group); 
 					case Token.VECPLUS:
 					case Token.VECMULT:
 					case Token.VECDOT: 
-						var node = new BinOp(ast.name, ast.type); return this.createBinOp(node, group); 
+						var name = newName();
+						var node = new BinOp(ast.name, ast.type, true, name); 
+						return this.createNameAbstraction(node, this.createBinOp, name, group);
 					case Token.LINK:
 						var node = new Linking(); return this.createBinOp(node, group); 
 					case Token.ASSIGN:
-						var node = new Assign(); return this.createBinOp(node, group); 
+						if (ast.hasPname) {
+							var name = newName();
+							var node = new Assign(true, name);
+							return this.createNameAbstraction(node, this.createBinOp, name, group);
+						}
+						else {
+							var node = new Assign(false); 
+							return this.createBinOp(node, group); 
+						}
 					case Token.FOLD: 
-						var node = new Fold(); return this.createBinOp(node, group);
+						var name = newName();
+						var node = new Fold(name); 
+						return this.createNameAbstraction(node, this.createBinOp, name, group);
 					case Token.NOT:
-						var node = new UnOp(ast.name, ast.type); return this.createUnOp(node, group); 
+						var node = new UnOp(ast.name, ast.type, false); return this.createUnOp(node, group); 
+					case Token.CELLCREATE:
+						var node = new CellCreate(); return this.createUnOp(node, group);
 					case Token.PEEK:
-						var node = new Peek(); return this.createUnOp(node, group);
+						var node = new Peek(); return this.createUnOp(node, group); 						
 					case Token.DEREF:
-						var node = new Deref(); return this.createUnOp(node, group);
+						if (ast.hasPname) {
+							var name = newName(); 
+							var node = new Deref(true, name);
+							return this.createNameAbstraction(node, this.createUnOp, name, group);
+						}
+						else {
+							var node = new Deref(false); 
+							return this.createUnOp(node, group); 
+						}
 					case Token.STEP:
-						var node = new Step().addToGroup(group);
+						var node = new Step().addToGroup(group); 
 						return new Term(node, []);
 				}
 			}
 
+			else if (ast instanceof NameAbstraction) {
+				// term
+				var orig_name = ast.name; 
+				var name = newName();
 
+				var outter = BoxWrapper.create().addToGroup(group);
 
-			
-			/*
-			else if (ast instanceof BinaryOp) {
-				var binop = new BinOp(ast.name).addToGroup(group);
+				var wrapper = BoxWrapper.create().addToGroup(outter.box);
+				wrapper.prin.delete();
+				var biglambda = new BigLambda(name).addToGroup(wrapper); 
+				wrapper.prin = biglambda;
+				var box = this.toGraph(ast.body, wrapper.box);
+				wrapper.auxs = wrapper.createPaxsOnTopOf(box.auxs);
+				wrapper.updateNames(orig_name, name); 
 
-				binop.subType = ast.type;
-				var left = this.toGraph(ast.v1, group);
-				var right = this.toGraph(ast.v2, group);
-
-				new Link(binop.key, left.prin.key, "w", "s").addToGroup(group);
-				new Link(binop.key, right.prin.key, "e", "s").addToGroup(group);
-
-				return new Term(binop, Term.joinAuxs(left.auxs, right.auxs, group));
+				new Link(biglambda.key, box.prin.key, "n", "s").addToGroup(wrapper);
+				outter.auxs = outter.createPaxsOnTopOf(wrapper.auxs);
+				new Link(outter.prin.key, wrapper.prin.key, "n", "s").addToGroup(outter);
+				return new Term(outter.prin, outter.auxs);
 			}
 
-			else if (ast instanceof UnaryOp) {
-				var unop = new UnOp(ast.name).addToGroup(group);
-				unop.subType = ast.type;
-				var box = this.toGraph(ast.v1, group);
-
-				new Link(unop.key, box.prin.key, "n", "s").addToGroup(group);
-
-				return new Term(unop, box.auxs);
-			}
-
-			else if (ast instanceof Deprecation) {
-				var term = this.toGraph(ast.term, group);
-				var dep = new Dep().addToGroup(group);
-				new Link(dep.key, term.prin.key, "n", "s").addToGroup(group);
-				return new Term(dep, term.auxs);
-			}
-
-			else if (ast instanceof Dereference) {
-				var term = this.toGraph(ast.term, group);
-				var deref = new Deref().addToGroup(group);
-				new Link(deref.key, term.prin.key, "n", "s").addToGroup(group);
-				return new Term(deref, term.auxs); 
-			}
-
-			else if (ast instanceof Change) {
-				var param = ast.param;
-				var delta = new Delta().addToGroup(group);
+			else if (ast instanceof NameInstantiation) {
 				var term = this.toGraph(ast.body, group);
-				var v = new Var(param).addToGroup(group);
-				new Link(delta.key, v.key, "w", "s").addToGroup(group);
-				new Link(delta.key, term.prin.key, "e", "s").addToGroup(group);
+				var der = new Der(term.prin.name).addToGroup(group);
+				var ins = new NameInstance(ast.name).addToGroup(group); 
+				new Link(der.key, term.prin.key, "n", "s").addToGroup(group);
+				new Link(ins.key, der.key, "n", "s").addToGroup(group);
 
-				var auxs = Array.from(term.auxs);
-				var p1Used = false;
-				var auxNode1;
-				for (var i=0; i<term.auxs.length; i++) {
-					var aux = auxs[i];
-					if (aux.name == param) {
-						p1Used = true;
-						auxs.splice(i, 1);
-						var con = new Contract(aux.name).addToGroup(group);
-						new Link(aux.key, con.key, "n", "s").addToGroup(group);
-						new Link(v.key, con.key, "n", "s").addToGroup(group);
-						auxs.push(con);
-						break;
-					}
-				}
-				if (!p1Used)
-					auxs.push(v);
-
-				return new Term(delta, auxs);
-			} 
-
-			else if (ast instanceof Assign) {
-				var param = ast.param;
-				var setn = new Set().addToGroup(group);
-				var term = this.toGraph(ast.body, group);
-				var v = new Var(param).addToGroup(group);
-				new Link(setn.key, v.key, "w", "s").addToGroup(group);
-				new Link(setn.key, term.prin.key, "e", "s").addToGroup(group);
-
-				var auxs = Array.from(term.auxs);
-				var p1Used = false;
-				var auxNode1;
-				for (var i=0; i<term.auxs.length; i++) {
-					var aux = auxs[i];
-					if (aux.name == param) {
-						p1Used = true;
-						auxs.splice(i, 1);
-						var con = new Contract(aux.name).addToGroup(group);
-						new Link(aux.key, con.key, "n", "s").addToGroup(group);
-						new Link(v.key, con.key, "n", "s").addToGroup(group);
-						auxs.push(con);
-						break;
-					}
-				}
-				if (!p1Used)
-					auxs.push(v);
-
-				return new Term(setn, auxs);
+				return new Term(ins, term.auxs);
 			}
 
-			else if (ast instanceof Propagation) {
-				var prop = new Prop().addToGroup(group);
-				return new Term(prop, []);
-			}
+		}
 
-			
+		createNameAbstraction(node, f, name, group) { 
+			var outter = BoxWrapper.create().addToGroup(group);
 
-			else if (ast instanceof Folding) {
-				var fold = new Fold().addToGroup(group);
+			var wrapper = BoxWrapper.create().addToGroup(outter.box);
+			wrapper.prin.delete();
+			var biglambda = new BigLambda(name).addToGroup(wrapper); 
+			wrapper.prin = biglambda;
+			var box = f(node, wrapper.box); 
+			wrapper.auxs = wrapper.createPaxsOnTopOf(box.auxs);
+			//wrapper.updateNames(orig_name, name); 
 
-				var left = this.toGraph(ast.v1, group);
-				var right = this.toGraph(ast.v2, group);
-
-				new Link(fold.key, left.prin.key, "w", "s").addToGroup(group);
-				new Link(fold.key, right.prin.key, "e", "s").addToGroup(group);
-
-				return new Term(fold, Term.joinAuxs(left.auxs, right.auxs, group));
-			}
-			*/
+			new Link(biglambda.key, box.prin.key, "n", "s").addToGroup(wrapper);
+			outter.auxs = outter.createPaxsOnTopOf(wrapper.auxs);
+			new Link(outter.prin.key, wrapper.prin.key, "n", "s").addToGroup(outter);
+			return new Term(outter.prin, outter.auxs);
 		}
 
 		createBinOp(node, group) {
 			var wrapper1 = BoxWrapper.create().addToGroup(group);
-			var abs1 = new Abs().addToGroup(wrapper1.box);
+			var abs1 = new Abs().addToGroup(wrapper1.box); 
 			new Link(wrapper1.prin.key, abs1.key, "n", "s").addToGroup(wrapper1);
 
 			var wrapper2 = BoxWrapper.create().addToGroup(wrapper1.box);

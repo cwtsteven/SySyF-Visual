@@ -26,13 +26,13 @@ define(function(require) {
 				var data = token.dataStack.pop();
 				token.dataStack.pop();
 				token.dataStack.push(data);
-				token.rewriteFlag = RewriteFlag.F_MOD;
+				token.rewriteFlag = RewriteFlag.F_CREATE;
 				return this.findLinksInto(null)[0];
 			}
 		}
 
 		rewrite(token, nextLink) {
-			if (nextLink.to == this.key && token.rewriteFlag == RewriteFlag.F_MOD) {
+			if (nextLink.to == this.key && token.rewriteFlag == RewriteFlag.F_CREATE) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
 				var data = token.dataStack.pop();
 

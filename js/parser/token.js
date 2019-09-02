@@ -65,6 +65,7 @@ define(function() {
     'FROM',
     'PC',
     'FOLD', 
+    'CELLCREATE',
 
     'BIGLAMBDA',
     'LSQPAREM',

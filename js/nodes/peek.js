@@ -26,14 +26,14 @@ define(function(require) {
 					var data = token.dataStack.pop();
 					token.dataStack.pop();
 					token.dataStack.push(new Pair(data.a,CompData.EMPTY));
-					token.rewriteFlag = RewriteFlag.F_DEP;
+					token.rewriteFlag = RewriteFlag.F_PEEK;
 					return this.findLinksInto(null)[0]; 
 				}
 			}
 		}
 
 		rewrite(token, nextLink) {
-			if (nextLink.to == this.key && token.rewriteFlag == RewriteFlag.F_DEP) {
+			if (nextLink.to == this.key && token.rewriteFlag == RewriteFlag.F_PEEK) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
 				var data = token.dataStack.last();
 

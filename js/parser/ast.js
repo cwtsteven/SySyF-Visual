@@ -110,7 +110,8 @@ define('ast/cell-creation', function() {
 
 define('ast/fusion', function() {
   class Fusion {
-    constructor(id, body) {
+    constructor(name, id, body) {
+      this.name = name;
       this.id = id;
       this.body = body;
     }
@@ -125,4 +126,24 @@ define('ast/pc', function() {
     }
   }
   return Pc; 
+});
+
+define('ast/name-abstraction', function() {
+  class NameAbstraction {
+    constructor(name, body) {
+      this.name = name;
+      this.body = body;
+    }
+  }
+  return NameAbstraction; 
+});
+
+define('ast/name-instantiation', function() {
+  class NameInstantiation {
+    constructor(name, body) {
+      this.name = name;
+      this.body = body;
+    }
+  }
+  return NameInstantiation; 
 });

@@ -13,9 +13,10 @@ define(function(require) {
 
 	class Fold extends Node {
 
-		constructor() {
-			super(null, 'F', "mediumpurple1");
+		constructor(pname) {
+			super(null, 'f', "mediumpurple1");
 			this.subType = null;
+			this.updatePName(pname); 
 		}
 		
 		transition(token, link) {
@@ -113,8 +114,13 @@ define(function(require) {
 
 		}
 
+		updatePName(pname) {
+			this.pname = pname; 
+			this.text = "f("+pname+")";
+		}
+
 		copy() {
-			var newNode = new Fold();
+			var newNode = new Fold(this.pname);
 			return newNode;
 		}
 	}

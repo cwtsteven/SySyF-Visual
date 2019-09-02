@@ -4,40 +4,74 @@ define(function(require) {
 	var CompData = require('token').CompData();
 	var RewriteFlag = require('token').RewriteFlag();
 	var Link = require('link');
+	var App = require('nodes/app');
 	var Promo = require('nodes/promo');
 	var Const = require('nodes/const');
-	var Projection = require('nodes/proj');
 	var Contract = require('nodes/contract');
 	var Param = require('nodes/param');
 	var ProvCon = require('nodes/pc');
 	var Cell = require('nodes/cell');
-	var Pair = require('token').Pair();
+	var Pair = require('token').Pair(); 
 
 	class Fuse extends Node {
 
-		constructor() {
-			super(null, "f","indianred1");
+		constructor(pname) {
+			super(null, "F("+pname+")","indianred1");
+			this.updatePName(pname);
 		}
-		
-		transition(token, link) { 
-			if (link.to == this.key) {
-				var nextLink = this.findLinksOutOf("n")[0];
-				token.dataStack.push(CompData.PROMPT);
-				return nextLink; 
+
+		transition(token, link) {
+			if (link.to == this.key && link.toPort == "s") {
+				var prev = this.graph.findNodeByKey(this.findLinksInto("s")[0].from);
+				var data = token.dataStack.last(); 
+				if (data == CompData.PROMPT && !(prev instanceof App)) {
+					token.dataStack.pop(); 
+					token.dataStack.push(new Pair(CompData.LAMBDA,CompData.EMPTY)); 
+					token.forward = false; 
+					return link; 
+				}
+				else if (data == CompData.PROMPT && prev instanceof App) {
+					var nextLink = this.findLinksOutOf(null)[0];
+					token.dataStack.pop();
+					token.rewriteFlag = RewriteFlag.F_FUSE;
+					return nextLink; 
+				}
 			}
-			else if (link.from == this.key) {
-				token.dataStack.pop();
-				token.rewriteFlag = RewriteFlag.F_FUSE;
-				var nextLink = this.findLinksInto("s")[0];
-				return nextLink;
-			}
-		}
+		} 
 
 		rewrite(token, nextLink) {
-			if (token.rewriteFlag == RewriteFlag.F_FUSE && nextLink.to == this.key) {
+			if (token.rewriteFlag == RewriteFlag.F_FUSE && nextLink.from == this.key) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
 
-				nextLink = this.aux(this);
+				var prev = this.graph.findNodeByKey(this.findLinksInto("s")[0].from);
+				if (prev instanceof App) {
+					// M rule
+					var appLink = prev.findLinksInto(null)[0];
+					var appOtherLink = prev.findLinksOutOf("e")[0];
+					var otherNextLink = this.findLinksInto("w")[0];
+
+
+					// fuse
+					var root = this.graph.findNodeByKey(appOtherLink.to);
+					var vec = this.fuse(root);
+					var con = new Contract().addToGroup(prev.group);
+					new Link(con.key, appOtherLink.to, "n", appOtherLink.toPort).addToGroup(prev.group);
+					appOtherLink.changeTo(vec.key, "s");
+
+					nextLink.changeFrom(appLink.from, appLink.fromPort);
+					nextLink.changeToGroup(appLink.group);
+					
+					otherNextLink.changeTo(appOtherLink.to, appOtherLink.toPort);
+					otherNextLink.reverse = false;
+
+					var otherNode = this.graph.findNodeByKey(otherNextLink.from);
+					if (otherNode.findLinksOutOf().length == 1) 
+						otherNextLink.fromPort = "n";
+					otherNextLink.changeToGroup(appOtherLink.group);
+					
+					this.delete();
+					prev.delete();
+				}
 					
 				token.rewrite = true;
 				return nextLink;
@@ -49,7 +83,7 @@ define(function(require) {
 			}
 		}
 
-		aux(node) {
+		fuse(node) { 
 			var nodes = [node];
 			var visitedCell = []; 
 			var target = []; 
@@ -57,10 +91,6 @@ define(function(require) {
 				var node = nodes.pop();
 
 				if (node instanceof ProvCon) { 
-					if (target.indexOf(node.key) == -1) 
-						target.push(node.key);
-				}
-				else if (node instanceof Projection) { 
 					if (target.indexOf(node.key) == -1) 
 						target.push(node.key); 
 				}
@@ -79,41 +109,41 @@ define(function(require) {
 					links.forEach(function(link) {
 						newNodes.push(node.graph.findNodeByKey(link.to));
 					});
-					nodes = nodes.concat(newNodes);
+					nodes = nodes.concat(newNodes); 
 				}
 			}
 
-			var index = 0;
-			var vec = new Param().addToGroup(this.group);
-			var con = new Contract().addToGroup(this.group);
-			new Link(con.key, vec.key, "n", "s").addToGroup(this.group);
+			var vec = new Param(this.pname).addToGroup(this.group);
+			//var con = new Contract().addToGroup(this.group);
+			//new Link(con.key, vec.key, "n", "s").addToGroup(this.group);
 			target.forEach(function(key) {
-				var node = vec.graph.findNodeByKey(key);
-				var proj = new Projection(index).addToGroup(vec.group);
-				new Link(proj.key, con.key, "n", "s").addToGroup(vec.group);
-				node.findLinksInto(null)[0].changeTo(proj.key,"s");
-				index++;
-				if (node instanceof ProvCon) {
-					var c = new Const(node.data).addToGroup(vec.group);
-					new Link(vec.key, c.key, "n", "s").addToGroup(vec.group);					
-					node.delete();
+				var node = vec.graph.findNodeByKey(key); 
+				var prev = node.graph.findNodeByKey(node.findLinksInto(null)[0].from);
+				if (prev instanceof Contract) {
+					new Link(vec.key, prev.key, "n", "s").addToGroup(vec.group);
 				}
-				else if (node instanceof Projection) {
-					new Link(vec.key, node.key, "n", "s").addToGroup(vec.group);
+				else {
+					var con = new Contract().addToGroup(vec.group);
+					new Link(con.key, node.key, "n", "s").addToGroup(vec.group); 
+					node.findLinksInto(null)[0].changeTo(con.key,"s");
+					//if (node instanceof ProvCon) {
+						//var c = new Const(node.data).addToGroup(vec.group);
+						new Link(vec.key, con.key, "n", "s").addToGroup(vec.group);					
+						//node.delete(); 
+					//}
 				}
-			});
+			});			
 
-			var nextLink = this.findLinksInto(null)[0];
-			nextLink.changeTo(con.key,"s");
-
-			var weak = new Contract().addToGroup(this.group);
-			this.findLinksOutOf(null)[0].changeFrom(weak.key,"n");
-			this.delete()
-			return nextLink;
+			return vec;
+		}
+		
+		updatePName(pname) {
+			this.pname = pname;
+			this.text = "F("+pname+")";
 		}
 
 		copy() {
-			return new Fuse();
+			return new Fuse(this.pname);
 		}
 	}
 

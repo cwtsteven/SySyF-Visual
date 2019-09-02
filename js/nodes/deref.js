@@ -4,8 +4,10 @@ define(function(require) {
 
 	class Deref extends Node {
 
-		constructor() {
+		constructor(hasPname, pname) {
 			super(null, "d", "mediumpurple1"); 
+			this.hasPname = hasPname;
+			this.updatePName(pname);
 		}
 
 		transition(token, link) {
@@ -16,7 +18,14 @@ define(function(require) {
 		}
 
 		copy() {
-			return new Deref();
+			return new Deref(this.hasPname, this.pname);
+		}
+
+		updatePName(pname) {
+			if (this.hasPname) {
+				this.pname = pname;
+				this.text = "d("+pname+")";
+			}
 		}
 
 	}

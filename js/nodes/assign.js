@@ -8,14 +8,16 @@ define(function(require) {
 	var Link = require('link');
 	var Const = require('nodes/const');
 	var Param = require('nodes/param');
-	var Projection = require('nodes/proj');
+	var ProvCon = require('nodes/pc');
 	var Contract = require('nodes/contract');
 	var Pair = require('token').Pair();
 
 	class Assign extends Node {
 
-		constructor() {
+		constructor(hasPname, pname) {
 			super(null, "a", "indianred1");
+			this.hasPname = hasPname;
+			this.updatePName(pname);
 		}
 		
 		transition(token, link) {
@@ -53,15 +55,15 @@ define(function(require) {
 				var data = pair.a; 
 				var key = pair.b;
 				token.dataStack.push(new Pair(CompData.UNIT,CompData.EMPTY));
+				var node = this.graph.findNodeByKey(key);
 
-				if (key == CompData.DEP) {
+				if (node instanceof Param) {
 					for (var i=0; i<data.length; i++) {
-						this.update(this.graph.findNodeByKey(this.findLinksOutOf("w")[0].to),i,data[i]);
+						this.update(this.graph.findNodeByKey(node.findLinksOutOf(null)[i].to),data[i]);
 					}
 				}
-				else {
-					var mod = this.graph.findNodeByKey(key);
-					mod.update(data);
+				else if (node instanceof Cell) {
+					node.update(data);
 				}
 				var weak1 = new Contract().addToGroup(this.group);
 				this.findLinksOutOf("w")[0].changeFrom(weak1.key, "n");
@@ -85,19 +87,11 @@ define(function(require) {
 			}
 		}
 
-		update(node, k, n) {
+		update(node, n) {
 			while (true) {
-				if (node instanceof Const) {
-					node.name = n;
-					node.text = n;
+				if (node instanceof ProvCon) {
+					node.update(n);
 					break;
-				}
-				else if (node instanceof Projection) {
-					k = node.index;
-					node = this.graph.findNodeByKey(node.findLinksOutOf(null)[0].to);
-				}
-				else if (node instanceof Param) {
-					node = this.graph.findNodeByKey(node.findLinksOutOf(null)[k].to);
 				}
 				else if (node instanceof Contract) {
 					node = this.graph.findNodeByKey(node.findLinksOutOf(null)[0].to);
@@ -105,8 +99,15 @@ define(function(require) {
 			}
 		}
 
+		updatePName(pname) {
+			if (this.hasPname) { 
+				this.pname = pname; 
+				this.text = "a("+pname+")";
+			}
+		}
+
 		copy() {
-			return new Assign();
+			return new Assign(this.hasPname, this.pname);
 		}
 	}
 

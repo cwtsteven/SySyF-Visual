@@ -7,8 +7,8 @@ define(function(require) {
 	class ProvCon extends Node {
 		
 		constructor(n) {
-			super(null, "Pc("+n+")", "indianred1");
-			this.data = n;
+			super(null, "⟨"+n+"⟩", "indianred1");
+			this.data = n; 
 			//this.width = "1";
 			//this.height = "1";
 		}
@@ -20,6 +20,11 @@ define(function(require) {
 				token.forward = false;
 				return link;
 			}
+		}
+
+		update(data) {
+			this.data = data;
+			this.text = "⟨"+data+"⟩";
 		}
 
 		copy() {

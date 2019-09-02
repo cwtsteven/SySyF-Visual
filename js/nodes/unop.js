@@ -12,9 +12,12 @@ define(function(require) {
 
 	class UnOp extends Node {
 
-		constructor(text, subType) {
-			super(null, text, "mediumpurple1");
+		constructor(op, subType, hasPname, pname) {
+			super(null, op, "mediumpurple1");
 			this.subType = subType;
+			this.op = op;
+			this.hasPname = hasPname;
+			this.updatePName(pname);
 		}
 
 		transition(token, link) {
@@ -68,8 +71,15 @@ define(function(require) {
 			}
 		}
 
+		updatePName(pname) {
+			if (this.hasPname) {
+				this.pname = pname; 
+				this.text = this.op+"("+pname+")";
+			}
+		}
+
 		copy() {
-			var newNode = new UnOp(this.text, this.subType);
+			var newNode = new UnOp(this.op, this.subType, this.hasPname. this.pname);
 			return newNode;
 		}
 

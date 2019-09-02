@@ -8,8 +8,9 @@ define(function(require) {
 
 	class Param extends Node {
 
-		constructor() {
-			super(null, 'V', "mediumpurple1");
+		constructor(pname) {
+			super(null, "P("+pname+")", "mediumpurple1");
+			this.pname = pname;
 		}
 		
 		transition(token, link) {
@@ -17,19 +18,6 @@ define(function(require) {
 				var nextLink = this.findLinksOutOf(null).last();
 				token.dataStack.push(CompData.PROMPT);
 				return nextLink;
-			}
-			else if (link.to == this.key && token.dataStack.last().substring(0,1) == CompData.PROJ) {
-				var index = parseInt(token.dataStack.last().substring(1));
-				token.dataStack.push(CompData.PROMPT);
-				return this.findLinksOutOf(null)[index]; 
-			}
-			else if (link.from == this.key && typeof(token.dataStack[token.dataStack.length-2]) == "string" 
-										   && token.dataStack[token.dataStack.length-2].substring(0,1) == CompData.PROJ) {
-				var data = token.dataStack.pop();
-						   token.dataStack.pop();
-						   token.dataStack.pop();
-			    token.dataStack.push(data);
-			    return this.findLinksInto(null)[0];
 			}
 			else if (link.from == this.key) {
 				var index = this.findLinksOutOf(null).indexOf(link);
@@ -47,15 +35,14 @@ define(function(require) {
 						
 					}
 					token.dataStack.pop();
-					token.dataStack.push(new Pair(data,CompData.DEP));
-					return this.findLinksInto(null)[0]
+					token.dataStack.push(new Pair(data,this.key));
+					return this.findLinksInto(null)[0] 
 				}
 			}
 		}
 
 		copy() {
-			var newNode = new Param();
-			return newNode;
+			// should never happen
 		}
 	}
 

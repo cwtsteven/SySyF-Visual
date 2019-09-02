@@ -32,7 +32,7 @@ define(function(require) {
 			if ((isNumber(data) || typeof(data) === "boolean")) {
 				var oldData = this.data;
 				this.data = data;
-				this.text = "M\n(" + data + ")";
+				this.text = "{" + data + "}";
 				return oldData;
 			}
 		}
