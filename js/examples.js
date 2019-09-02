@@ -179,15 +179,15 @@ var rsum_ex =
 
 
 var linear_regression_ex = 
-  'let set = Λa.λx.λy. \n' 
-+ '  link[a] x y; \n'
-+ '  assign[a] x y \n'
+  'let set = λx.λy. \n' 
++ '  link x y; \n'
++ '  assign x y \n'
 + 'in \n'
 + ' \n'
 + 'let gradient_descent = Λa.λm.λps.λloss. \n'
 + '  let rate = 0.001 in  \n'
 + '  let d = 0.001 in  \n'
-+ '  let old_ps = peek[a] (deref[a] ps) in  \n'
++ '  let old_ps = peek (deref[a] ps) in  \n'
 + '  let g = λe. \n'
 + '    let old_loss = loss m in  \n'
 + '    assign[a] ps (old_ps ⊞[a] (d ⊠[a] e));  \n'
@@ -218,9 +218,9 @@ var linear_regression_ex =
 + 'peek (deref y)  \n';
 
 var fusion_ex = 
-  'let x = {pc 1 + pc 2} in \n' 
-+ 'F(a)ps. \n' 
-+ 'let ps = f 1 in \n' 
-+ 'link x pc 3; \n' 
-+ 'let qs = f 2 in \n' 
-+ 'ps ⊞ qs';
+  'let x = {pc 1} in \n' 
++ 'let y = x + pc 2 in\n'
++ 'let z = pc 3 + x in\n'
++ 'fuse(a) ps from y in\n'
++ 'fuse(b) qs from z in\n' 
++ 'x'; 

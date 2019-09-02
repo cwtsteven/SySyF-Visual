@@ -7,6 +7,7 @@ define(function(require) {
 	var Const = require('nodes/const');
 	var Link = require('link');
 	var Const = require('nodes/const');
+	var Cell =require('nodes/cell');
 	var Param = require('nodes/param');
 	var ProvCon = require('nodes/pc');
 	var Contract = require('nodes/contract');
