@@ -18,25 +18,24 @@ define(function(require) {
 		transition(token, link) {
 			if (link.to == this.key) {
 				var nextLink = this.findLinksOutOf("e")[0];
-				token.dataStack.push(CompData.PROMPT);
+				//token.dataStack.push(CompData.PROMPT);
 				return nextLink;
 			}
 			else if (link.from == this.key) {
 				if (link.fromPort == "e") {
 					var nextLink = this.findLinksOutOf("w")[0];
-					token.dataStack.pop();
+					//token.dataStack.pop();
 					token.dataStack.push(CompData.PROMPT);
 					token.forward = true; 
 					return nextLink;
 				}
 				else if (link.fromPort == "w") {
-					if (token.dataStack[token.dataStack.length-2] == CompData.PROMPT) {
-						var data = token.dataStack.pop();
-						token.dataStack.pop();
-						token.dataStack.push(new Pair(data.a,data.b));
-						token.rewriteFlag = RewriteFlag.F_DELTA;
-						return this.findLinksInto(null)[0];
-					}
+					var data = token.dataStack.pop();
+					token.dataStack.pop();
+					token.payload = data; 
+					token.dataStack.push(new Pair(CompData.UNIT,CompData.EMPTY));
+					token.rewriteFlag = RewriteFlag.F_DELTA;
+					return this.findLinksInto(null)[0];
 				}
 			}
 		}
@@ -45,8 +44,8 @@ define(function(require) {
 			if (token.rewriteFlag == RewriteFlag.F_DELTA && nextLink.to == this.key) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
 
-				var key = token.dataStack.pop().b;
-				token.dataStack.push(new Pair(CompData.UNIT,CompData.EMPTY));
+				var key = token.payload.b;
+				token.payload = null;
 
 				var data = token.dataStack.last();
 				var weak1 = new Contract().addToGroup(this.group);

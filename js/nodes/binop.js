@@ -24,7 +24,7 @@ define(function(require) {
 		transition(token, link) {
 			if (link.to == this.key) {
 				var nextLink = this.findLinksOutOf("e")[0];
-				token.dataStack.push(CompData.PROMPT);
+				//token.dataStack.push(CompData.PROMPT);
 				return nextLink;
 			}
 			else if (link.from == this.key && link.fromPort == "e") {
@@ -34,16 +34,14 @@ define(function(require) {
 				return nextLink;
 			}
 			else if (link.from == this.key && link.fromPort == "w") {
-				if (token.dataStack[token.dataStack.length-3] == CompData.PROMPT) { 
-					var l = token.dataStack.pop();
-					var r = token.dataStack.pop();
-				 			token.dataStack.pop();
-				 	var result = this.binOpApply(this.subType, l.a, r.a);
-				 	var type = (l.b == CompData.EMPTY && r.b == CompData.EMPTY) ? CompData.EMPTY : CompData.DEP;
-					token.dataStack.push(new Pair(result,type));
-					token.rewriteFlag = RewriteFlag.F_OP;	
-					return this.findLinksInto(null)[0];;
-				}	
+				var l = token.dataStack.pop();
+				var r = token.dataStack.pop();
+			 	//		token.dataStack.pop();
+			 	var result = this.binOpApply(this.subType, l.a, r.a);
+			 	var type = (l.b == CompData.EMPTY && r.b == CompData.EMPTY) ? CompData.EMPTY : CompData.DEP;
+				token.dataStack.push(new Pair(result,type));
+				token.rewriteFlag = RewriteFlag.F_OP;	
+				return this.findLinksInto(null)[0];;
 			}
 		}
 
@@ -87,7 +85,9 @@ define(function(require) {
 				case Token.SUB: return parseFloat(v1) - parseFloat(v2);
 				case Token.MULT: return parseFloat(v1) * parseFloat(v2);
 				case Token.DIV: return parseFloat(v1) / parseFloat(v2);
+				case Token.MOD: return parseFloat(v1) % parseFloat(v2);
 				case Token.LTE: return parseFloat(v1) <= parseFloat(v2);
+				case Token.NEQ: return parseFloat(v1) != parseFloat(v2);
 				case Token.VECPLUS: 
 					if (v1.length != v2.length)
 						return null;

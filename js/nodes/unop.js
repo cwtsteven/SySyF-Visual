@@ -23,18 +23,16 @@ define(function(require) {
 		transition(token, link) {
 			if (link.to == this.key) {
 				var nextLink = this.findLinksOutOf(null)[0];
-				token.dataStack.push(CompData.PROMPT);
+				//token.dataStack.push(CompData.PROMPT);
 				return nextLink;
 			}
 			else if (link.from == this.key) {
-				if (token.dataStack[token.dataStack.length-2] == CompData.PROMPT) {
-					var v1 = token.dataStack.pop();
-							 token.dataStack.pop();
-					var type = (v1.b == CompData.EMPTY) ? CompData.EMPTY : CompData.DEP;
-					token.dataStack.push(new Pair(this.unOpApply(this.subType, v1.a),CompData.EMPTY));
-					token.rewriteFlag = RewriteFlag.F_OP;
-					return this.findLinksInto(null)[0];
-				}
+				var v1 = token.dataStack.pop();
+				//		 token.dataStack.pop();
+				var type = (v1.b == CompData.EMPTY) ? CompData.EMPTY : CompData.DEP;
+				token.dataStack.push(new Pair(this.unOpApply(this.subType, v1.a),CompData.EMPTY));
+				token.rewriteFlag = RewriteFlag.F_OP;
+				return this.findLinksInto(null)[0];
 			}
 		}
 

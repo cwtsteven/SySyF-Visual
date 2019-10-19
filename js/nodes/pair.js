@@ -16,7 +16,6 @@ define(function(require) {
 		}
 		
 		transition(token, link) {
-			console.log("pair-trans");
 			if (link.to == this.key) {
 				var nextLink;
 				if (token.dataStack.last() == CompData.PR) {
@@ -28,6 +27,7 @@ define(function(require) {
 					nextLink = this.findLinksOutOf('w')[0];
 				}
 				else {
+					token.dataStack.pop();
 					token.dataStack.push(CompData.PE);
 					token.dataStack.push(CompData.PROMPT); 
 					nextLink = this.findLinksOutOf("e")[0]; ;
@@ -51,10 +51,11 @@ define(function(require) {
 			}
 			else if (link.from == this.key && link.fromPort == "w") {
 				if (token.dataStack[token.dataStack.length-3] == CompData.PE) {
+					console.log("here");
 					var l = token.dataStack.pop();
 					var r = token.dataStack.pop();
 				 			token.dataStack.pop();
-				 			token.dataStack.pop();
+				 	//		token.dataStack.pop();
 				 	var result = new Pair(l.a,r.a);
 				 	var type = (l.b == CompData.EMPTY && r.b == CompData.EMPTY) ? CompData.EMPTY : CompData.DEP;
 					token.dataStack.push(new Pair(result,type));

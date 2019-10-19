@@ -1,6 +1,8 @@
 define(function(require) {
 
 	var Node = require('node');
+	var CompData = require('token').CompData();
+	var Pair = require('token').Pair();	
 
 	class Deref extends Node {
 
@@ -14,6 +16,8 @@ define(function(require) {
 			if (link.to == this.key) 
 				return this.findLinksOutOf(null)[0]; 
 			else if (link.from == this.key) 
+				var data = token.dataStack.pop();
+				token.dataStack.push(new Pair(data.a, CompData.DEP))
 				return this.findLinksInto(null)[0]; 				
 		}
 

@@ -14,15 +14,17 @@ define(function(require) {
 
 		transition(token, link) {
 			if (link.to == this.key) {
-				var nextLink = this.findLinksOutOf("e")[0];
+				//var nextLink = this.findLinksOutOf("e")[0];
 				token.rewriteFlag = RewriteFlag.F_RECUR;
-				return nextLink;
+				return link;
 			}
 		}
 
 		rewrite(token, nextLink) {
-			if (token.rewriteFlag == RewriteFlag.F_RECUR && nextLink.from == this.key) {
+			if (token.rewriteFlag == RewriteFlag.F_RECUR && nextLink.to == this.key) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
+
+				var nextLink = this.findLinksOutOf("e")[0];
 
 				var wrapper = this.group.copy().addToGroup(this.group);
 				Term.joinAuxs(this.group.auxs, wrapper.auxs, wrapper.group);	

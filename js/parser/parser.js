@@ -118,9 +118,10 @@ define(function(require) {
       return token.type == Token.AND || token.type == Token.OR 
           || token.type == Token.PLUS || token.type == Token.SUB  
           || token.type == Token.MULT || token.type == Token.DIV 
+          || token.type == Token.MOD || token.type == Token.NEQ
           || token.type == Token.LTE || token.type == Token.COMMA
           || token.type == Token.VECPLUS || token.type == Token.VECMULT
-          || token.type == Token.VECDOT
+          || token.type == Token.VECDOT 
     }
 
     parseBinop(ctx, lhs, pred) {
@@ -228,9 +229,11 @@ define(function(require) {
         return new Pc(n); 
       }
       else if (this.lexer.next(Token.PEEK) || this.lexer.next(Token.DEREF) || this.lexer.next(Token.LINK)
+               || this.lexer.next(Token.ROOT) 
                || this.lexer.next(Token.ASSIGN) || this.lexer.next(Token.STEP) || this.lexer.next(Token.FOLD)
                || this.lexer.next(Token.AND) || this.lexer.next(Token.OR) || this.lexer.next(Token.PLUS)
                || this.lexer.next(Token.SUB) || this.lexer.next(Token.MULT) || this.lexer.next(Token.DIV)
+               || this.lexer.next(Token.MOD) || this.lexer.next(Token.NEQ) 
                || this.lexer.next(Token.LTE) || this.lexer.next(Token.COMMA) || this.lexer.next(Token.VECPLUS)
                || this.lexer.next(Token.VECMULT) || this.lexer.next(Token.VECDOT)
               ) {

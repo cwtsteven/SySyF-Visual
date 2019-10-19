@@ -46,6 +46,7 @@ define('goi-machine', function(require) {
 	var Parser = require('parser/parser');
 
 	var MachineToken = require('token');
+	var RewriteFlag = require('token').RewriteFlag();
 	var Link = require('link');		
 
 	var Graph = require('graph');
@@ -80,6 +81,7 @@ define('goi-machine', function(require) {
 	var Step = require('nodes/step');
 	var ProvCon = require('nodes/pc');
 	var Peek = require('nodes/peek');
+	var Root = require('nodes/root');
 
 	var BigLambda = require('nodes/biglambda');
 	var NameInstance = require('nodes/name-instance');
@@ -121,6 +123,7 @@ define('goi-machine', function(require) {
 			this.hasUpdate = false;
 			// create graph
 			var start = new Start().addToGroup(this.graph.child);
+			console.log(ast);
 			var term = this.toGraph(ast, this.graph.child);
 			new Link(start.key, term.prin.key, "n", "s").addToGroup(this.graph.child);
 			this.deleteVarNode(this.graph.child);
@@ -323,15 +326,18 @@ define('goi-machine', function(require) {
 				var node; 
 				var machine = this;
 				switch (ast.type) {
-					case Token.ADD: 
+					case Token.AND: 
 					case Token.OR:
 					case Token.PLUS:
 					case Token.SUB:
 					case Token.MULT:
 					case Token.DIV:
+					case Token.MOD:
 					case Token.LTE:
-					case Token.COMMA:
+					case Token.NEQ:
 						var node = new BinOp(ast.name, ast.type, false); return this.createBinOp(node, group); 
+					case Token.COMMA:
+						var node = new Pair(); return this.createBinOp(node, group); 
 					case Token.VECPLUS:
 					case Token.VECMULT:
 					case Token.VECDOT: 
@@ -359,7 +365,9 @@ define('goi-machine', function(require) {
 					case Token.CELLCREATE:
 						var node = new CellCreate(); return this.createUnOp(node, group);
 					case Token.PEEK:
-						var node = new Peek(); return this.createUnOp(node, group); 						
+						var node = new Peek(); return this.createUnOp(node, group); 
+					case Token.ROOT:
+						var node = new Root(); return this.createUnOp(node, group);						
 					case Token.DEREF:
 						if (ast.hasPname) {
 							var name = newName(); 
@@ -542,6 +550,8 @@ define('goi-machine', function(require) {
 								machine.hasUpdate = true;
 						})
 						this.newValues.clear();
+						this.token.rewriteFlag = RewriteFlag.F_STEP;
+						this.token.foward = false;
 						return;
 					}
 				}
@@ -591,6 +601,10 @@ define('goi-machine', function(require) {
 
 			else {
 				var target = token.forward ? token.link.from : token.link.to;
+				if (token.rewriteFlag == RewriteFlag.F_LAMBDA 
+					|| token.rewriteFlag == RewriteFlag.F_RECUR
+					|| token.rewriteFlag == RewriteFlag.F_STEP)
+					target = token.link.to; 
 				node = this.graph.findNodeByKey(target);
 				var nextLink = node.rewrite(token, token.link);
 				//console.log(nextLink);

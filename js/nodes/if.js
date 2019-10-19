@@ -16,7 +16,7 @@ define(function(require) {
 		transition(token, link) {
 			if (link.to == this.key) {
 				var nextLink = this.findLinksOutOf("w")[0];
-				token.dataStack.push(CompData.PROMPT);
+				//token.dataStack.push(CompData.PROMPT);
 				return nextLink;
 			}
 			else if (link.from == this.key && link.fromPort == "w") {
@@ -26,6 +26,7 @@ define(function(require) {
 					if (data.a == true) {
 						var nextLink = this.findLinksOutOf("n")[0];
 						token.dataStack.pop();
+						token.dataStack.push(CompData.PROMPT)
 						token.rewriteFlag = RewriteFlag.F_IF;
 						token.forward = true;
 						return nextLink; 
@@ -33,6 +34,7 @@ define(function(require) {
 					else if (data.a == false) {
 						var nextLink = this.findLinksOutOf("e")[0];
 						token.dataStack.pop();
+						token.dataStack.push(CompData.PROMPT)
 						token.rewriteFlag = RewriteFlag.F_IF;
 						token.forward = true;
 						return nextLink; 
@@ -64,7 +66,7 @@ define(function(require) {
 						result = x;
 					else
 						result = y;
-					token.dataStack.pop();
+					//token.dataStack.pop();
 					var type = (result.b == CompData.DEP || result.b == CompData.EMPTY) ? CompData.DEP : result.b;
 					token.dataStack.push(new Pair(result.a, type));
 					token.forward = false;

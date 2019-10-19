@@ -17,10 +17,7 @@ define(function(require) {
 		transition(token, link) {
 			if (link.to == this.key) {
 				if (token.dataStack.last() == CompData.PROMPT) {
-					token.dataStack.pop();
-					token.dataStack.push([false, CompData.EMPTY]);
-					token.rewriteFlag = RewriteFlag.F_PROP;
-					token.forward = false;
+					token.rewriteFlag = RewriteFlag.F_SP;
 					token.machine.startPropagation();
 					return link; 
 				}
@@ -28,7 +25,7 @@ define(function(require) {
 		}
 
 		rewrite(token, nextLink) {
-			if (token.rewriteFlag == RewriteFlag.F_PROP && nextLink.to == this.key) {
+			if (token.rewriteFlag == RewriteFlag.F_STEP && nextLink.to == this.key) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
 				var data = token.machine.hasUpdate; 
 				token.dataStack.pop();
@@ -40,6 +37,7 @@ define(function(require) {
 				this.delete();
 
 				token.rewrite = true;
+				token.forward = false;
 				return nextLink;
 			}
 

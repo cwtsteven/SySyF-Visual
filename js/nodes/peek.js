@@ -18,17 +18,15 @@ define(function(require) {
 		transition(token, link) {
 			if (link.to == this.key) {
 				var nextLink = this.findLinksOutOf(null)[0]; 
-				token.dataStack.push(CompData.PROMPT);
+				//token.dataStack.push(CompData.PROMPT);
 				return nextLink;
 			}
 			else if (link.from == this.key) {
-				if (token.dataStack[token.dataStack.length-2] == CompData.PROMPT) {
-					var data = token.dataStack.pop();
-					token.dataStack.pop();
-					token.dataStack.push(new Pair(data.a,CompData.EMPTY));
-					token.rewriteFlag = RewriteFlag.F_PEEK;
-					return this.findLinksInto(null)[0]; 
-				}
+				var data = token.dataStack.pop();
+				//token.dataStack.pop();
+				token.dataStack.push(new Pair(data.a,CompData.EMPTY));
+				token.rewriteFlag = RewriteFlag.F_PEEK;
+				return this.findLinksInto(null)[0]; 
 			}
 		}
 

@@ -27,11 +27,13 @@ define(function() {
 		F_RECUR: '<μ>',
 		F_CREATE: '<m>',
 		F_PEEK: '<p>',
+		F_ROOT: '<r>',
 		F_LINK: '<l>',
 		F_ASSIGN: '<a>',
 		F_FUSE: '<F>',
 		F_FOLD: '<f>',
 		F_STEP: '<s>',
+		F_SP: '<sp>',
 		F_BIGLAMBDA: '<Λ>',
 
 		F_PAIR: '<,>',
@@ -84,6 +86,7 @@ define(function() {
 			this.link = null;
 			
 			this.rewriteFlag = RewriteFlag.EMPTY;
+			this.payload = null;
 			this.dataStack = [CompData.PROMPT];
 			this.boxStack = [];
 		}

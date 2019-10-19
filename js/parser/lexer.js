@@ -110,9 +110,16 @@ define(function(require) {
           this._token = new Token(Token.DIV, '/', 13);
           break;
 
+        case '%':
+          this._token = new Token(Token.MOD, '%', 13); 
+          break;
+
         case '<':
-          if (this._nextChar() == '=')
+          var nexttoken = this._nextChar(); 
+          if (nexttoken == '=')
             this._token = new Token(Token.LTE, '<=', 10);
+          else if (nexttoken == '>')
+            this._token = new Token(Token.NEQ, '<>', 10);
           else {
             this._index--;
             this.fail();
@@ -192,6 +199,8 @@ define(function(require) {
               this._token = new Token(Token.PEEK);
             else if (str == "deref")
               this._token = new Token(Token.DEREF);
+            else if (str == "root")
+              this._token = new Token(Token.ROOT);
             else if (str == "fuse")
               this._token = new Token(Token.FUSION);
             else if (str == "from")

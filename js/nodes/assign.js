@@ -24,7 +24,7 @@ define(function(require) {
 		transition(token, link) {
 			if (link.to == this.key) {
 				var nextLink = this.findLinksOutOf("e")[0];
-				token.dataStack.push(CompData.PROMPT);
+				//token.dataStack.push(CompData.PROMPT);
 				return nextLink;
 			}
 			else if (link.from == this.key) {
@@ -36,14 +36,13 @@ define(function(require) {
 					return nextLink;
 				}
 				else if (link.fromPort == "w") {
-					if (token.dataStack[token.dataStack.length-3] == CompData.PROMPT) {
-						var data = token.dataStack.pop();
-						var new_v = token.dataStack.pop();
-						token.dataStack.pop();
-						token.dataStack.push(new Pair(new_v.a, data.b));
-						token.rewriteFlag = RewriteFlag.F_ASSIGN; 
-						return this.findLinksInto(null)[0];
-					}
+					var data = token.dataStack.pop();
+					var new_v = token.dataStack.pop();
+					//token.dataStack.pop();
+					token.dataStack.push(new Pair(CompData.UNIT,CompData.EMPTY));
+					token.rewriteFlag = RewriteFlag.F_ASSIGN;
+					token.payload = new Pair(new_v.a, data.b);
+					return this.findLinksInto(null)[0];
 				}
 			}
 		}
@@ -52,10 +51,11 @@ define(function(require) {
 			if (token.rewriteFlag == RewriteFlag.F_ASSIGN && nextLink.to == this.key) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
 
-				var pair = token.dataStack.pop();
+				var pair = token.payload;
 				var data = pair.a; 
 				var key = pair.b;
-				token.dataStack.push(new Pair(CompData.UNIT,CompData.EMPTY));
+				token.payload = null;
+				
 				var node = this.graph.findNodeByKey(key);
 
 				if (node instanceof Param) {

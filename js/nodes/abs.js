@@ -24,16 +24,14 @@ define(function(require) {
 					return link;
 				}
 				else if (data == CompData.PROMPT && prev instanceof App) {
-					var nextLink = this.findLinksOutOf(null)[0];
-					token.dataStack.pop();
 					token.rewriteFlag = RewriteFlag.F_LAMBDA;
-					return nextLink; 
+					return link; 
 				}
 			}
 		}
 
 		rewrite(token, nextLink) {
-			if (token.rewriteFlag == RewriteFlag.F_LAMBDA && nextLink.from == this.key) {
+			if (token.rewriteFlag == RewriteFlag.F_LAMBDA && nextLink.to == this.key) {
 				token.rewriteFlag = RewriteFlag.EMPTY;
 
 				var prev = this.graph.findNodeByKey(this.findLinksInto("s")[0].from);
@@ -42,9 +40,10 @@ define(function(require) {
 					var appLink = prev.findLinksInto(null)[0];
 					var appOtherLink = prev.findLinksOutOf("e")[0];
 					var otherNextLink = this.findLinksInto("w")[0];
+					var rightout = this.findLinksOutOf("e")[0];
 
-					nextLink.changeFrom(appLink.from, appLink.fromPort);
-					nextLink.changeToGroup(appLink.group);
+					rightout.changeFrom(appLink.from, appLink.fromPort);
+					rightout.changeToGroup(appLink.group);
 					
 					otherNextLink.changeTo(appOtherLink.to, appOtherLink.toPort);
 					otherNextLink.reverse = false;
@@ -59,7 +58,7 @@ define(function(require) {
 				}
 					
 				token.rewrite = true;
-				return nextLink;
+				return rightout;
 			}
 			
 			else if (token.rewriteFlag == RewriteFlag.EMPTY) {
